@@ -153,7 +153,7 @@
 <header class="top">
   <div>
     <h1>Instalaciones en Terreno</h1>
-    <div class="sub">Fichas de instalación &middot; <span id="period-range">—</span></div>
+    <div class="sub">Fichas de instalación &middot; ventana móvil de <b>30 días</b> &middot; <span id="period-range">—</span></div>
   </div>
   <div class="filters" id="form-filters">
     <button data-cat="all" class="active">Todos</button>
@@ -197,7 +197,7 @@
       <thead>
         <tr>
           <th>Fecha</th><th>Técnico</th><th>Categoría</th>
-          <th>Cód. Monitoreo</th><th>Ciudad</th><th>Sol. Servicio</th><th>Evidencia</th>
+          <th>Cód. Monitoreo</th><th>Ciudad</th><th>Sol. Servicio</th><th>Evidencia</th><th>Boleta</th>
         </tr>
       </thead>
       <tbody id="detail-tbody"></tbody>
@@ -251,6 +251,7 @@
       "No se actualiza solo &mdash; para ver datos nuevos hay que pedir un snapshot nuevo. " +
       "El buscador filtra por código de monitoreo, técnico y N° de Solicitud de Servicio. " +
       "La columna <b>Evidencia</b> enlaza a la firma del cliente cargada en DataScope (pública, sin necesidad de iniciar sesión). " +
+      "La columna <b>Boleta</b> descarga el comprobante PDF generado automáticamente por DataScope para esa ficha (aparece \"—\" si DataScope todavía no lo generó). " +
       "El técnico se identifica por la <b>cuenta</b> que cargó la ficha en la app, no por el campo de texto libre “Técnico” (ese campo tiene errores de tipeo y espacios sueltos frecuentes). " +
       "Cuando una cuenta muestra el ⚠ de discrepancia, el nombre escrito en la ficha no coincide con el nombre de la cuenta en una parte relevante de los casos.";
   }
@@ -470,8 +471,9 @@
         '<td>'+esc(r.ciudad||"—")+'</td>' +
         '<td class="mono">'+esc(r.solicitud_servicio||"—")+'</td>' +
         '<td class="ev-links">'+(ev.join(" · ")||"—")+'</td>' +
+        '<td>'+(r.pdf_url ? '<a href="'+r.pdf_url+'" target="_blank" rel="noopener">Descargar</a>' : "—")+'</td>' +
         '</tr>';
-    }).join("") || '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
+    }).join("") || '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
 
     document.getElementById("pg-info").textContent = "Página "+PAGE+" de "+totalPages+" · "+fmtNum(total)+" instalaciones";
     document.getElementById("pg-prev").disabled = PAGE<=1;
