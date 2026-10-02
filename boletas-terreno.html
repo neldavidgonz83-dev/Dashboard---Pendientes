@@ -1,0 +1,527 @@
+<title>Boletas en Terreno</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f6f8fb; --surface:#ffffff; --surface-2:#edf1f7; --surface-3:#e3e9f1;
+    --border:rgba(16,23,35,.10); --border-strong:rgba(16,23,35,.16);
+    --text:#10131a; --text-2:#525d6d; --muted:#8792a1;
+    --accent:#2a78d6; --accent-ink:#184f95; --accent-soft:rgba(42,120,214,.10);
+    --accent2:#eb6834; --accent2-soft:rgba(235,104,52,.12);
+    --good:#0ca30c; --good-soft:rgba(12,163,12,.10);
+    --warning:#b8790f; --warning-soft:rgba(250,178,25,.16);
+    --critical:#d03b3b; --critical-soft:rgba(208,59,59,.10);
+    --shadow: 0 1px 2px rgba(16,23,35,.04), 0 8px 24px -12px rgba(16,23,35,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --page:#0c0e13; --surface:#13161e; --surface-2:#181c27; --surface-3:#20242f;
+      --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.16);
+      --text:#eef1f6; --text-2:#a3adbd; --muted:#6b7686;
+      --accent:#5a9bef; --accent-ink:#bcd7fb; --accent-soft:rgba(90,155,239,.14);
+      --accent2:#f08a5a; --accent2-soft:rgba(240,138,90,.16);
+      --good:#28c440; --good-soft:rgba(40,196,64,.14);
+      --warning:#fab219; --warning-soft:rgba(250,178,25,.16);
+      --critical:#e66767; --critical-soft:rgba(230,103,103,.14);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:#0c0e13; --surface:#13161e; --surface-2:#181c27; --surface-3:#20242f;
+    --border:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.16);
+    --text:#eef1f6; --text-2:#a3adbd; --muted:#6b7686;
+    --accent:#5a9bef; --accent-ink:#bcd7fb; --accent-soft:rgba(90,155,239,.14);
+    --accent2:#f08a5a; --accent2-soft:rgba(240,138,90,.16);
+    --good:#28c440; --good-soft:rgba(40,196,64,.14);
+    --warning:#fab219; --warning-soft:rgba(250,178,25,.16);
+    --critical:#e66767; --critical-soft:rgba(230,103,103,.14);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--page); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:20px 16px 48px; max-width:1240px; margin:0 auto;
+  }
+  h1,h2,h3{font-family:"Big Shoulders Display",system-ui,sans-serif; font-weight:800; letter-spacing:.2px; margin:0; text-wrap:balance;}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums;}
+  a{color:var(--accent-ink);}
+
+  header.top{display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);}
+  header.top h1{font-size:clamp(28px,4vw,38px); line-height:1.05;}
+  header.top .sub{color:var(--text-2); font-size:13.5px; margin-top:6px;}
+  header.top .sub b{color:var(--text); font-weight:600;}
+
+  .filters{display:flex; gap:6px; background:var(--surface-2); padding:4px; border-radius:10px; border:1px solid var(--border);}
+  .filters button{
+    appearance:none; border:none; background:transparent; color:var(--text-2);
+    padding:7px 14px; border-radius:7px; font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .filters button.active{background:var(--accent); color:#fff;}
+  .filters button:not(.active):hover{background:var(--surface-3); color:var(--text);}
+
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:22px;}
+  @media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);}
+  .kpi .label{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600;}
+  .kpi .value{font-family:"Big Shoulders Display",sans-serif; font-weight:700; font-size:28px; margin-top:4px; font-variant-numeric:tabular-nums;}
+  .kpi .ctx{font-size:12px; color:var(--text-2); margin-top:3px;}
+  .kpi.flag .value{color:var(--warning);}
+
+  .grid2{display:grid; grid-template-columns:1.3fr 1fr; gap:14px; margin-bottom:14px; align-items:stretch;}
+  @media (max-width:860px){.grid2{grid-template-columns:1fr;}}
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow);}
+  .panel h2{font-size:17px; margin-bottom:2px;}
+  .panel .panel-sub{font-size:12px; color:var(--muted); margin-bottom:12px;}
+
+  #rank-list{max-height:420px; overflow-y:auto; padding-right:4px;}
+  .rank-row{display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center; padding:7px 0; border-bottom:1px solid var(--border);}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-name{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; display:flex; align-items:center; gap:6px;}
+  .rank-bar-wrap{background:var(--surface-3); border-radius:5px; height:8px; overflow:hidden;}
+  .rank-bar{height:100%; background:var(--accent); border-radius:5px;}
+  .rank-num{font-size:13px; font-variant-numeric:tabular-nums; color:var(--text-2); text-align:right; white-space:nowrap;}
+  .flag-badge{
+    display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%;
+    background:var(--warning-soft); color:var(--warning); font-size:10px; font-weight:800; cursor:help; flex:none;
+  }
+
+  .barchart-row{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:5px 0;}
+  .barchart-label{font-size:12.5px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .barchart-track{grid-column:1/3; background:var(--surface-3); border-radius:5px; height:10px; overflow:hidden; margin-bottom:2px;}
+  .barchart-fill{height:100%; background:var(--accent); border-radius:5px;}
+  .barchart-count{font-size:12px; color:var(--text-2); font-variant-numeric:tabular-nums;}
+
+  .legend{display:flex; gap:16px; font-size:12.5px; color:var(--text-2); margin-bottom:6px;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+  .chart-wrap{position:relative;}
+  svg.linechart{width:100%; height:auto; overflow:visible;}
+  .gridline{stroke:var(--border); stroke-width:1;}
+  .axis-label{fill:var(--muted); font-size:10px; font-family:"IBM Plex Mono",monospace;}
+  .line-series{fill:none; stroke-width:2;}
+  .area-series{opacity:.14;}
+  .hover-dot{r:4; stroke:var(--surface); stroke-width:2;}
+  .crosshair{stroke:var(--muted); stroke-width:1; stroke-dasharray:2 3; opacity:0;}
+  .tooltip{
+    position:absolute; pointer-events:none; background:var(--surface); border:1px solid var(--border-strong);
+    border-radius:8px; padding:8px 10px; font-size:12px; box-shadow:var(--shadow); opacity:0; transition:opacity .1s;
+    white-space:nowrap; z-index:5;
+  }
+  .tooltip .t-date{color:var(--muted); font-size:11px; margin-bottom:3px;}
+  .tooltip .t-row{display:flex; align-items:center; gap:6px;}
+  .tooltip i{width:8px; height:8px; border-radius:2px; display:inline-block;}
+
+  .detail-toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;}
+  .detail-toolbar input, .detail-toolbar select{
+    font:inherit; font-size:13px; padding:7px 10px; border-radius:8px; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--text);
+  }
+  .detail-toolbar input{flex:1; min-width:160px;}
+  table.detail{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.detail th{
+    text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+    padding:7px 8px; border-bottom:2px solid var(--border-strong); position:sticky; top:0; background:var(--surface);
+  }
+  table.detail td{padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.detail td.num{text-align:right; font-variant-numeric:tabular-nums;}
+  .table-scroll{overflow-x:auto; max-height:520px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
+  .pill{display:inline-block; padding:2px 8px; border-radius:99px; font-size:10.5px; font-weight:600;}
+  .pill.at{background:var(--accent-soft); color:var(--accent-ink);}
+  .pill.ric{background:var(--accent2-soft); color:var(--accent2);}
+  .ev-links{display:flex; gap:6px; font-size:11px;}
+  .ev-links a{white-space:nowrap;}
+  .pager{display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12.5px; color:var(--text-2);}
+  .pager button{
+    font:inherit; font-size:12.5px; padding:5px 12px; border-radius:7px; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--text); cursor:pointer;
+  }
+  .pager button:disabled{opacity:.4; cursor:default;}
+
+  footer{margin-top:24px; padding-top:14px; border-top:1px solid var(--border); font-size:11.5px; color:var(--muted); line-height:1.6;}
+
+  section{margin-bottom:14px;}
+</style>
+
+<header class="top">
+  <div>
+    <h1>Boletas en Terreno</h1>
+    <div class="sub">Asistencia Técnica de campo &middot; ventana móvil de <b>30 días</b> &middot; <span id="period-range">—</span></div>
+  </div>
+  <div class="filters" id="form-filters">
+    <button data-form="all" class="active">Todos</button>
+    <button data-form="Asistencia Técnica">Asistencia Técnica</button>
+    <button data-form="Asistencia Técnica RIC">RIC</button>
+  </div>
+</header>
+
+<div class="kpis" id="kpi-row"></div>
+
+<div class="grid2">
+  <div class="panel">
+    <h2>Ranking por técnico</h2>
+    <div class="panel-sub">Boletas completadas en el período &middot; ordenado por volumen</div>
+    <div id="rank-list"></div>
+  </div>
+  <div class="panel">
+    <h2>Tipo de problema</h2>
+    <div class="panel-sub" id="problema-sub">Motivos más frecuentes de asistencia</div>
+    <div id="problema-chart"></div>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>Evolución diaria</h2>
+  <div class="panel-sub">Boletas digitalizadas por día</div>
+  <div class="legend" id="daily-legend"></div>
+  <div class="chart-wrap" id="daily-chart"></div>
+</section>
+
+<section class="panel">
+  <h2>Detalle de boletas</h2>
+  <div class="panel-sub">Filtrable por técnico, tipo de problema o texto libre</div>
+  <div class="detail-toolbar">
+    <input type="text" id="search-box" placeholder="Buscar por ID de documento, técnico o N° de solicitud de mantenimiento...">
+    <select id="tecnico-select"><option value="">Todos los técnicos</option></select>
+    <select id="problema-select"><option value="">Todos los problemas</option></select>
+  </div>
+  <div class="table-scroll">
+    <table class="detail">
+      <thead>
+        <tr>
+          <th>ID Doc.</th><th>Fecha</th><th>Técnico</th><th>Form.</th><th>Tipo de problema</th>
+          <th style="text-align:right">Costo M.O.</th><th style="text-align:right">Duración</th>
+          <th>Cliente / Cód.</th><th>Zona</th><th>Sol. Mtto.</th><th>Evidencia</th><th>Documento</th>
+        </tr>
+      </thead>
+      <tbody id="detail-tbody"></tbody>
+    </table>
+  </div>
+  <div class="pager">
+    <button id="pg-prev">&larr; Anterior</button>
+    <span id="pg-info">—</span>
+    <button id="pg-next">Siguiente &rarr;</button>
+  </div>
+</section>
+
+<footer id="footer-note">Cargando…</footer>
+
+<script>
+(function(){
+  var DATA = null, FILTER = "all", PAGE = 1, PAGE_SIZE = 25;
+  var SEARCH = "", TEC_FILTER = "", PROB_FILTER = "";
+
+  function fmtGs(n){
+    if(n==null || isNaN(n)) return "—";
+    return "Gs " + Math.round(n).toLocaleString("es-PY").replace(/,/g,".");
+  }
+  function fmtNum(n){ return n==null? "—" : n.toLocaleString("es-PY").replace(/,/g,"."); }
+  function fmtDur(min){
+    if(min==null) return "—";
+    var h = Math.floor(min/60), m = Math.round(min%60);
+    return h>0 ? (h+"h "+m+"m") : (m+"m");
+  }
+  function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });}
+
+  function loadData(){
+    fetch("boletas-terreno-data.json").then(function(r){return r.json();}).then(function(d){
+      DATA = d;
+      buildOptions();
+      render();
+    }).catch(function(err){
+      document.getElementById("footer-note").textContent = "No se pudieron cargar los datos (" + err + ").";
+    });
+  }
+
+  function buildOptions(){
+    var tecs = Array.from(new Set(DATA.detalle.map(function(r){return r.tecnico;}))).sort();
+    var sel = document.getElementById("tecnico-select");
+    tecs.forEach(function(t){
+      var o = document.createElement("option"); o.value=t; o.textContent=t; sel.appendChild(o);
+    });
+    var probs = {};
+    DATA.detalle.forEach(function(r){ probs[r.tipo_problema] = (probs[r.tipo_problema]||0)+1; });
+    var probSorted = Object.keys(probs).sort(function(a,b){return probs[b]-probs[a];});
+    var psel = document.getElementById("problema-select");
+    probSorted.forEach(function(p){
+      var o = document.createElement("option"); o.value=p; o.textContent=p; psel.appendChild(o);
+    });
+    var periodEl = document.getElementById("period-range");
+    periodEl.textContent = fmtDate(DATA.period_start) + " – " + fmtDate(DATA.period_end);
+    document.getElementById("footer-note").innerHTML =
+      "Snapshot generado el " + fmtDateTime(DATA.generated_at) + " a partir de la API de DataScope (formularios “Asistencia Técnica” y “Asistencia Técnica RIC”). " +
+      "No se actualiza solo &mdash; para ver datos nuevos hay que pedir un snapshot nuevo. " +
+      "El buscador filtra por ID de documento, técnico (cuenta o nombre declarado) y número de Solicitud de Mantenimiento. " +
+      "La columna <b>Documento</b> descarga el comprobante PDF generado automáticamente por DataScope para esa boleta (público, sin necesidad de iniciar sesión). " +
+      "El técnico se identifica por la <b>cuenta</b> que cargó la boleta en la app, no por el campo de texto libre “Técnico” (ese campo tiene errores de tipeo frecuentes). " +
+      "Cuando una cuenta muestra el ⚠ de discrepancia, el nombre escrito en boletas no coincide con el nombre de la cuenta en una parte relevante de los casos — posible dispositivo o cuenta compartida entre dos personas; conviene confirmarlo operativamente antes de usarlo para evaluar desempeño individual.";
+  }
+
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var p = iso.split("-"); return p[2]+"/"+p[1]+"/"+p[0];
+  }
+  function fmtDateTime(iso){
+    if(!iso) return "—";
+    var d = new Date(iso);
+    return d.toLocaleDateString("es-PY") + " " + d.toLocaleTimeString("es-PY",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  function filteredData(){
+    return DATA.detalle.filter(function(r){ return FILTER==="all" || r.form_type===FILTER; });
+  }
+
+  function render(){
+    var rows = filteredData();
+    renderKpis(rows);
+    renderRanking(rows);
+    renderProblemas(rows);
+    renderDaily(rows);
+    PAGE = 1;
+    renderDetailTable();
+  }
+
+  function renderKpis(rows){
+    var n = rows.length;
+    var costos = rows.filter(function(r){return r.costo_mo!=null;});
+    var costoTotal = costos.reduce(function(a,r){return a+r.costo_mo;},0);
+    var costoProm = costos.length? costoTotal/costos.length : null;
+    var durs = rows.filter(function(r){return r.duracion_min!=null;});
+    var durProm = durs.length? durs.reduce(function(a,r){return a+r.duracion_min;},0)/durs.length : null;
+    var conDecl = rows.filter(function(r){return r.tecnico_declarado;});
+    var noCoincide = conDecl.filter(function(r){return !r.coincide_cuenta;});
+    var pctDisc = conDecl.length? (100*noCoincide.length/conDecl.length) : 0;
+
+    var tiles = [
+      {label:"Boletas digitalizadas", value: fmtNum(n), ctx: FILTER==="all" ? "Ambos formularios" : FILTER},
+      {label:"Costo total mano de obra", value: fmtGs(costoTotal), ctx: costos.length+" boletas con costo cargado"},
+      {label:"Costo promedio / boleta", value: fmtGs(costoProm), ctx: "por boleta con costo cargado"},
+      {label:"Duración promedio", value: fmtDur(durProm), ctx: "entre hora de entrada y salida"},
+      {label:"Discrepancia técnico/cuenta", value: pctDisc.toFixed(1)+"%", ctx: noCoincide.length+" de "+conDecl.length+" boletas", flag: pctDisc>5}
+    ];
+    var el = document.getElementById("kpi-row");
+    el.innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.flag?' flag':'')+'"><div class="label">'+esc(t.label)+'</div>' +
+        '<div class="value">'+t.value+'</div><div class="ctx">'+esc(t.ctx)+'</div></div>';
+    }).join("");
+  }
+
+  function renderRanking(rows){
+    var byTec = {};
+    rows.forEach(function(r){
+      var k = r.tecnico;
+      if(!byTec[k]) byTec[k] = {tecnico:k, count:0, costo:0, costoN:0, dur:0, durN:0, decl:0, noMatch:0};
+      var b = byTec[k];
+      b.count++;
+      if(r.costo_mo!=null){ b.costo += r.costo_mo; b.costoN++; }
+      if(r.duracion_min!=null){ b.dur += r.duracion_min; b.durN++; }
+      if(r.tecnico_declarado){ b.decl++; if(!r.coincide_cuenta) b.noMatch++; }
+    });
+    var list = Object.values(byTec).sort(function(a,b){return b.count-a.count;});
+    var max = list.length? list[0].count : 1;
+    var el = document.getElementById("rank-list");
+    el.innerHTML = list.map(function(t){
+      var pctDisc = t.decl? (100*t.noMatch/t.decl) : 0;
+      var flag = pctDisc > 15;
+      var costoTxt = t.costoN? fmtGs(t.costo) : "—";
+      return '<div class="rank-row">' +
+        '<div class="rank-name">'+ (flag? '<span class="flag-badge" title="'+pctDisc.toFixed(0)+'% de sus boletas declaran un nombre distinto al de la cuenta — revisar si el dispositivo/cuenta se comparte.">!</span>':'') +
+        esc(t.tecnico)+'</div>' +
+        '<div class="rank-bar-wrap"><div class="rank-bar" style="width:'+(100*t.count/max)+'%"></div></div>' +
+        '<div class="rank-num">'+t.count+' bol.</div>' +
+        '<div class="rank-num mono">'+costoTxt+'</div>' +
+        '</div>';
+    }).join("") || '<div style="color:var(--muted);font-size:13px">Sin datos para este filtro.</div>';
+  }
+
+  function renderProblemas(rows){
+    var counts = {};
+    rows.forEach(function(r){ counts[r.tipo_problema] = (counts[r.tipo_problema]||0)+1; });
+    var arr = Object.keys(counts).map(function(k){return {name:k, count:counts[k]};}).sort(function(a,b){return b.count-a.count;});
+    var top = arr.slice(0,8);
+    var restSum = arr.slice(8).reduce(function(a,x){return a+x.count;},0);
+    if(restSum>0) top.push({name:"Otros", count:restSum});
+    var max = top.length? Math.max.apply(null, top.map(function(x){return x.count;})) : 1;
+    var el = document.getElementById("problema-chart");
+    el.innerHTML = top.map(function(x){
+      return '<div class="barchart-row">' +
+        '<div class="barchart-label">'+esc(x.name)+'</div>' +
+        '<div class="barchart-count">'+x.count+'</div>' +
+        '<div class="barchart-track"><div class="barchart-fill" style="width:'+(100*x.count/max)+'%"></div></div>' +
+        '</div>';
+    }).join("") || '<div style="color:var(--muted);font-size:13px">Sin datos para este filtro.</div>';
+  }
+
+  function renderDaily(rows){
+    var byDay = {};
+    rows.forEach(function(r){
+      var day = (r.created_at||"").slice(0,10);
+      if(!day) return;
+      if(!byDay[day]) byDay[day] = {"Asistencia Técnica":0, "Asistencia Técnica RIC":0};
+      byDay[day][r.form_type] = (byDay[day][r.form_type]||0) + 1;
+    });
+    var days = Object.keys(byDay).sort();
+    var seriesDef = [
+      {key:"Asistencia Técnica", color:"var(--accent)", label:"Asistencia Técnica"},
+      {key:"Asistencia Técnica RIC", color:"var(--accent2)", label:"RIC"}
+    ];
+    var activeSeries = seriesDef.filter(function(s){ return FILTER==="all" || FILTER===s.key; });
+
+    var legendEl = document.getElementById("daily-legend");
+    legendEl.innerHTML = activeSeries.map(function(s){
+      return '<span><i style="background:'+s.color+'"></i>'+esc(s.label)+'</span>';
+    }).join("");
+
+    var W = 1000, H = 220, PAD_L = 36, PAD_R = 8, PAD_T = 12, PAD_B = 22;
+    var maxVal = 1;
+    days.forEach(function(d){ activeSeries.forEach(function(s){ maxVal = Math.max(maxVal, byDay[d][s.key]||0); }); });
+    maxVal = Math.ceil(maxVal*1.15) || 1;
+
+    function x(i){ return PAD_L + (days.length<=1?0:(i/(days.length-1))*(W-PAD_L-PAD_R)); }
+    function y(v){ return H-PAD_B - (v/maxVal)*(H-PAD_T-PAD_B); }
+
+    var gridlines = "";
+    var steps = 4;
+    for(var i=0;i<=steps;i++){
+      var val = Math.round(maxVal*i/steps);
+      var yy = y(val);
+      gridlines += '<line class="gridline" x1="'+PAD_L+'" x2="'+(W-PAD_R)+'" y1="'+yy+'" y2="'+yy+'"/>';
+      gridlines += '<text class="axis-label" x="4" y="'+(yy+3)+'">'+val+'</text>';
+    }
+
+    var xlabels = "";
+    var labelEvery = Math.max(1, Math.ceil(days.length/7));
+    days.forEach(function(d,i){
+      if(i % labelEvery === 0 || i===days.length-1){
+        xlabels += '<text class="axis-label" x="'+x(i)+'" y="'+(H-4)+'" text-anchor="middle">'+d.slice(5)+'</text>';
+      }
+    });
+
+    var seriesSvg = "";
+    activeSeries.forEach(function(s){
+      var pts = days.map(function(d,i){ return x(i)+","+y(byDay[d][s.key]||0); }).join(" ");
+      var areaPts = "M"+PAD_L+","+(H-PAD_B)+" "+days.map(function(d,i){return "L"+x(i)+","+y(byDay[d][s.key]||0);}).join(" ")+" L"+x(days.length-1)+","+(H-PAD_B)+" Z";
+      seriesSvg += '<path class="area-series" d="'+areaPts+'" fill="'+s.color+'"></path>';
+      seriesSvg += '<polyline class="line-series" points="'+pts+'" stroke="'+s.color+'"></polyline>';
+    });
+
+    var dotsSvg = "";
+    days.forEach(function(d,i){
+      activeSeries.forEach(function(s){
+        dotsSvg += '<circle class="hover-dot" data-day="'+d+'" data-series="'+s.key+'" cx="'+x(i)+'" cy="'+y(byDay[d][s.key]||0)+'" fill="'+s.color+'" opacity="0"></circle>';
+      });
+    });
+
+    var svg = '<svg class="linechart" viewBox="0 0 '+W+' '+H+'" id="daily-svg">' +
+      gridlines + xlabels + seriesSvg + dotsSvg +
+      '<line class="crosshair" id="crosshair" x1="0" x2="0" y1="'+PAD_T+'" y2="'+(H-PAD_B)+'"></line>' +
+      '<rect x="'+PAD_L+'" y="0" width="'+(W-PAD_L-PAD_R)+'" height="'+H+'" fill="transparent" id="hover-capture"></rect>' +
+      '</svg><div class="tooltip" id="daily-tooltip"></div>';
+
+    var el = document.getElementById("daily-chart");
+    el.innerHTML = svg;
+
+    var svgEl = document.getElementById("daily-svg");
+    var capture = document.getElementById("hover-capture");
+    var tooltip = document.getElementById("daily-tooltip");
+    var crosshair = document.getElementById("crosshair");
+
+    capture.addEventListener("mousemove", function(evt){
+      var rect = svgEl.getBoundingClientRect();
+      var scaleX = W / rect.width;
+      var mx = (evt.clientX - rect.left) * scaleX;
+      var idx = 0, best = Infinity;
+      days.forEach(function(d,i){ var dist = Math.abs(x(i)-mx); if(dist<best){best=dist; idx=i;} });
+      var day = days[idx];
+      if(!day) return;
+      crosshair.setAttribute("x1", x(idx)); crosshair.setAttribute("x2", x(idx)); crosshair.style.opacity = 1;
+      var rows2 = '<div class="t-date">'+day+'</div>';
+      activeSeries.forEach(function(s){
+        rows2 += '<div class="t-row"><i style="background:'+s.color+'"></i>'+esc(s.label)+': <b class="mono">'+(byDay[day][s.key]||0)+'</b></div>';
+      });
+      tooltip.innerHTML = rows2;
+      tooltip.style.opacity = 1;
+      var px = (x(idx)/W) * rect.width;
+      tooltip.style.left = Math.min(rect.width-140, Math.max(0, px+10)) + "px";
+      tooltip.style.top = "4px";
+    });
+    capture.addEventListener("mouseleave", function(){
+      tooltip.style.opacity = 0; crosshair.style.opacity = 0;
+    });
+  }
+
+  function renderDetailTable(){
+    var rows = filteredData().filter(function(r){
+      if(TEC_FILTER && r.tecnico!==TEC_FILTER) return false;
+      if(PROB_FILTER && r.tipo_problema!==PROB_FILTER) return false;
+      if(SEARCH){
+        var hay = (r.tecnico+" "+r.tecnico_declarado+" "+(r.cliente||"")+" "+(r.codigo_monitoreo||"")+" "+(r.code||"")+
+          " "+(r.solicitud_mantenimiento||"")+" "+(r.solicitud_mantenimiento_2||"")+" "+r.tipo_problema).toLowerCase();
+        if(hay.indexOf(SEARCH.toLowerCase())===-1) return false;
+      }
+      return true;
+    }).sort(function(a,b){ return (b.created_at||"").localeCompare(a.created_at||""); });
+
+    var total = rows.length;
+    var totalPages = Math.max(1, Math.ceil(total/PAGE_SIZE));
+    if(PAGE>totalPages) PAGE = totalPages;
+    var start = (PAGE-1)*PAGE_SIZE;
+    var pageRows = rows.slice(start, start+PAGE_SIZE);
+
+    var tbody = document.getElementById("detail-tbody");
+    tbody.innerHTML = pageRows.map(function(r){
+      var pillClass = r.form_type==="Asistencia Técnica RIC" ? "ric" : "at";
+      var pillLabel = r.form_type==="Asistencia Técnica RIC" ? "RIC" : "AT";
+      var clienteTxt = r.cliente ? esc(r.cliente) : (r.codigo_monitoreo ? esc(r.codigo_monitoreo) : "—");
+      var ev = [];
+      if(r.firma_url) ev.push('<a href="'+r.firma_url+'" target="_blank" rel="noopener">Firma</a>');
+      if(r.foto_url) ev.push('<a href="'+r.foto_url+'" target="_blank" rel="noopener">Foto</a>');
+      var solMtto = (r.solicitud_mantenimiento && r.solicitud_mantenimiento!=="0") ? esc(r.solicitud_mantenimiento) : "—";
+      if(r.solicitud_mantenimiento_2) solMtto += " / " + esc(r.solicitud_mantenimiento_2);
+      var docLink = r.pdf_url ? '<a href="'+r.pdf_url+'" target="_blank" rel="noopener">Descargar</a>' : "—";
+      return '<tr>' +
+        '<td class="mono">'+esc(r.code||"—")+'</td>' +
+        '<td class="mono">'+esc(r.fecha_asistencia||fmtDate((r.created_at||"").slice(0,10)))+'</td>' +
+        '<td>'+esc(r.tecnico)+'</td>' +
+        '<td><span class="pill '+pillClass+'">'+pillLabel+'</span></td>' +
+        '<td>'+esc(r.tipo_problema)+'</td>' +
+        '<td class="num mono">'+fmtGs(r.costo_mo)+'</td>' +
+        '<td class="num mono">'+fmtDur(r.duracion_min)+'</td>' +
+        '<td>'+clienteTxt+'</td>' +
+        '<td>'+esc(r.zona||"—")+'</td>' +
+        '<td class="mono">'+solMtto+'</td>' +
+        '<td class="ev-links">'+(ev.join(" · ")||"—")+'</td>' +
+        '<td>'+docLink+'</td>' +
+        '</tr>';
+    }).join("") || '<tr><td colspan="12" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
+
+    document.getElementById("pg-info").textContent = "Página "+PAGE+" de "+totalPages+" · "+fmtNum(total)+" boletas";
+    document.getElementById("pg-prev").disabled = PAGE<=1;
+    document.getElementById("pg-next").disabled = PAGE>=totalPages;
+  }
+
+  document.getElementById("form-filters").addEventListener("click", function(e){
+    var btn = e.target.closest("button"); if(!btn) return;
+    document.querySelectorAll("#form-filters button").forEach(function(b){b.classList.remove("active");});
+    btn.classList.add("active");
+    FILTER = btn.getAttribute("data-form");
+    render();
+  });
+  document.getElementById("search-box").addEventListener("input", function(e){ SEARCH = e.target.value; PAGE=1; renderDetailTable(); });
+  document.getElementById("tecnico-select").addEventListener("change", function(e){ TEC_FILTER = e.target.value; PAGE=1; renderDetailTable(); });
+  document.getElementById("problema-select").addEventListener("change", function(e){ PROB_FILTER = e.target.value; PAGE=1; renderDetailTable(); });
+  document.getElementById("pg-prev").addEventListener("click", function(){ if(PAGE>1){PAGE--; renderDetailTable();} });
+  document.getElementById("pg-next").addEventListener("click", function(){ PAGE++; renderDetailTable(); });
+
+  loadData();
+})();
+</script>
