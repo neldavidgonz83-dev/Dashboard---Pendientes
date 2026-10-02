@@ -182,10 +182,11 @@
     <input type="text" id="bi-search" placeholder="Buscar por N° de solicitud o técnico...">
     <select id="bi-tec"><option value="">Todos los técnicos</option></select>
     <select id="bi-grp"><option value="">Todos los tipos</option></select>
+    <select id="bi-cre"><option value="">Todos los creadores de caso</option></select>
   </div>
   <div class="table-scroll">
     <table class="detail">
-      <thead><tr><th>Sol. Mtto.</th><th>Tipo</th><th>Estado BI</th><th>Técnico asignado</th><th>Fecha coord./trans.</th><th style="text-align:right">Días</th><th>Situación</th></tr></thead>
+      <thead><tr><th>Sol. Mtto.</th><th>Caso</th><th>Creó el caso</th><th>Tipo</th><th>Estado BI</th><th>Técnico asignado</th><th>Fecha coord./trans.</th><th style="text-align:right">Días</th><th>Situación</th></tr></thead>
       <tbody id="bi-tbody"></tbody>
     </table>
   </div>
@@ -223,7 +224,7 @@
     <table class="detail">
       <thead>
         <tr>
-          <th>Fecha</th><th>Técnico</th><th>Cód. Monitoreo</th><th>Caso</th><th>Sol. Mtto.</th>
+          <th>Fecha</th><th>Técnico</th><th>Cód. Monitoreo</th><th>Caso</th><th>Creó el caso</th><th>Sol. Mtto.</th>
           <th style="text-align:right">Equipos</th><th>Detalle de equipos</th><th>Evidencia</th><th>Boleta</th>
         </tr>
       </thead>
@@ -247,6 +248,10 @@
   function fmtNum(n){ return n==null? "—" : n.toLocaleString("es-PY").replace(/,/g,"."); }
   function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function creador(code, nombre){
+    if(!code) return '<span style="color:var(--muted)">sin dato</span>';
+    return nombre ? esc(code)+' &middot; '+esc(nombre) : esc(code);
+  }
   function fmtDate(iso){ if(!iso) return "—"; var p=iso.split("-"); return p[2]+"/"+p[1]+"/"+p[0]; }
   function fmtDateTime(iso){ if(!iso) return "—"; var d=new Date(iso);
     return d.toLocaleDateString("es-PY")+" "+d.toLocaleTimeString("es-PY",{hour:"2-digit",minute:"2-digit"}); }
@@ -355,7 +360,7 @@
       if(TEC && r.tecnico!==TEC) return false;
       if(EQ && !r.equipos.some(function(e){return e.tipo===EQ;})) return false;
       if(SEARCH){
-        var hay=(r.tecnico+" "+(r.tecnico_declarado||"")+" "+(r.codigo_monitoreo||"")+" "+(r.caso||"")+" "+(r.solicitud_mantenimiento||"")+" "+(r.code||"")).toLowerCase();
+        var hay=(r.tecnico+" "+(r.tecnico_declarado||"")+" "+(r.codigo_monitoreo||"")+" "+(r.caso||"")+" "+(r.caso_creador||"")+" "+(r.solicitud_mantenimiento||"")+" "+(r.code||"")).toLowerCase();
         if(hay.indexOf(SEARCH.toLowerCase())===-1) return false;
       }
       return true;
@@ -369,13 +374,13 @@
       if(r.firma_url) ev.push('<a href="'+r.firma_url+'" target="_blank" rel="noopener">Firma</a>');
       var det=r.equipos.map(function(e){return e.cantidad+"× "+esc(e.tipo);}).join("; ");
       return '<tr><td class="mono">'+fmtDate(r.fecha)+'</td><td>'+esc(r.tecnico)+'</td>'+
-        '<td class="mono">'+esc(r.codigo_monitoreo||"—")+'</td><td class="mono">'+esc(r.caso||"—")+'</td>'+
+        '<td class="mono">'+esc(r.codigo_monitoreo||"—")+'</td><td class="mono">'+esc(r.caso||"—")+'</td><td>'+creador(r.caso_creador,r.caso_creador_nombre)+'</td>'+
         '<td class="mono">'+esc(r.solicitud_mantenimiento||"—")+'</td>'+
         '<td style="text-align:right" class="mono">'+r.total_equipos+'</td>'+
         '<td style="max-width:420px">'+(det||"—")+'</td>'+
         '<td class="ev-links">'+(ev.join(" · ")||"—")+'</td>'+
         '<td>'+(r.pdf_url?'<a href="'+r.pdf_url+'" target="_blank" rel="noopener">Descargar</a>':"—")+'</td></tr>';
-    }).join("") || '<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
+    }).join("") || '<tr><td colspan="10" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
     document.getElementById("pg-info").textContent="Página "+PAGE+" de "+pages+" · "+fmtNum(total)+" desmontajes";
     document.getElementById("pg-prev").disabled = PAGE<=1;
     document.getElementById("pg-next").disabled = PAGE>=pages;
@@ -389,17 +394,20 @@
 
   /* ===== Seguimiento contra Power BI ===== */
   var BI_STATUS = {0:"Sin coordinar",1:"Coordinado",3:"Realizado",4:"Estado 4",5:"Estado 5",6:"Realizado (cerrado)"};
-  var BI_EST = "Pendiente", BI_PAGE = 1, BI_SEARCH = "", BI_TEC = "", BI_GRP = "";
+  var BI_EST = "Pendiente", BI_PAGE = 1, BI_SEARCH = "", BI_TEC = "", BI_GRP = "", BI_CRE = "";
   function biItems(){ return (DATA && DATA.bi) ? DATA.bi.items : []; }
   function initBi(){
     if(!DATA.bi){ return; }
     document.getElementById("bi-section").style.display = "";
     var b = DATA.bi;
     document.getElementById("bi-sub").innerHTML = "Datos de Power BI hasta el <b>"+fmtDate(b.bi_data_until)+"</b> (último refresco del modelo; snapshot del "+fmtDateTime(b.snapshot_at)+"). "+
-      "Las fichas de DataScope se actualizan cada noche; las solicitudes nuevas de Power BI se suman al refrescar el snapshot.";
+      "Las fichas de DataScope se actualizan cada noche; las solicitudes nuevas de Power BI se suman al refrescar el snapshot."+
+      (b.casos_sin_creador? " <b>"+fmtNum(b.casos_sin_creador)+"</b> solicitudes aun no tienen el creador del caso (la tabla de casos del modelo esta mas atrasada que la de solicitudes).":"");
     var tec = Array.from(new Set(b.items.map(function(i){return i.tecnico||"Sin técnico";}))).sort();
     var ts = document.getElementById("bi-tec"); tec.forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent=t;ts.appendChild(o);});
     var gr = Array.from(new Set(b.items.map(function(i){return i.grupo;}))).sort();
+    var cre = Array.from(new Set(b.items.map(function(i){return i.caso_creador||"(sin dato)";}))).sort();
+    var cs = document.getElementById("bi-cre"); cre.forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent=t;cs.appendChild(o);});
     var gs = document.getElementById("bi-grp"); gr.forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent=t;gs.appendChild(o);});
     renderBi();
   }
@@ -433,7 +441,8 @@
       if(i.estado!==BI_EST) return false;
       if(BI_TEC && (i.tecnico||"Sin técnico")!==BI_TEC) return false;
       if(BI_GRP && i.grupo!==BI_GRP) return false;
-      if(BI_SEARCH && (String(i.sm)+" "+(i.tecnico||"")).toLowerCase().indexOf(BI_SEARCH.toLowerCase())===-1) return false;
+      if(BI_CRE && (i.caso_creador||"(sin dato)")!==BI_CRE) return false;
+      if(BI_SEARCH && (String(i.sm)+" "+(i.caso||"")+" "+(i.caso_creador||"")+" "+(i.caso_creador_nombre||"")+" "+(i.tecnico||"")).toLowerCase().indexOf(BI_SEARCH.toLowerCase())===-1) return false;
       return true;
     }).sort(function(a,b){ return (b.dias==null?-1:b.dias)-(a.dias==null?-1:a.dias); });
     var total=rows.length, pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
@@ -441,9 +450,9 @@
     var slice = rows.slice((BI_PAGE-1)*PAGE_SIZE, (BI_PAGE-1)*PAGE_SIZE+PAGE_SIZE);
     document.getElementById("bi-tbody").innerHTML = slice.map(function(i){
       var sit = i.estado==="Pendiente" ? (i.dias!=null && i.dias>14 ? "Pendiente &gt; 14 días" : "Pendiente") : (i.estado==="Realizado sin ficha" ? "Falta cargar la ficha" : "Ficha cargada");
-      return '<tr><td class="mono">'+i.sm+'</td><td>'+esc(i.grupo)+'</td><td>'+esc(i.status+" · "+(BI_STATUS[i.status]||""))+'</td><td>'+esc(i.tecnico||"Sin técnico")+'</td>'+
+      return '<tr><td class="mono">'+i.sm+'</td><td class="mono">'+(i.caso||"—")+'</td><td>'+creador(i.caso_creador,i.caso_creador_nombre)+'</td><td>'+esc(i.grupo)+'</td><td>'+esc(i.status+" · "+(BI_STATUS[i.status]||""))+'</td><td>'+esc(i.tecnico||"Sin técnico")+'</td>'+
         '<td class="mono">'+fmtDate(i.fecha)+'</td><td class="mono" style="text-align:right">'+(i.dias==null?"—":i.dias)+'</td><td>'+sit+'</td></tr>';
-    }).join("") || '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:20px">Sin resultados.</td></tr>';
+    }).join("") || '<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:20px">Sin resultados.</td></tr>';
     document.getElementById("bi-info").textContent = "Página "+BI_PAGE+" de "+pages+" · "+fmtNum(total)+" solicitudes";
     document.getElementById("bi-prev").disabled = BI_PAGE<=1; document.getElementById("bi-next").disabled = BI_PAGE>=pages;
   }
@@ -455,6 +464,7 @@
   document.getElementById("bi-search").addEventListener("input", function(e){ BI_SEARCH=e.target.value; BI_PAGE=1; renderBiTable(); });
   document.getElementById("bi-tec").addEventListener("change", function(e){ BI_TEC=e.target.value; BI_PAGE=1; renderBiTable(); });
   document.getElementById("bi-grp").addEventListener("change", function(e){ BI_GRP=e.target.value; BI_PAGE=1; renderBiTable(); });
+  document.getElementById("bi-cre").addEventListener("change", function(e){ BI_CRE=e.target.value; BI_PAGE=1; renderBiTable(); });
   document.getElementById("bi-prev").addEventListener("click", function(){ if(BI_PAGE>1){BI_PAGE--; renderBiTable();} });
   document.getElementById("bi-next").addEventListener("click", function(){ BI_PAGE++; renderBiTable(); });
 })();
