@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
 <title>Desmontajes Pendientes RIC</title>
 <style>
 :root{
@@ -14,23 +13,8 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
 body{background:var(--bg);color:var(--ink);padding:12px;padding-bottom:40px}
 
-/* Gate */
-#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;
-  justify-content:center;z-index:999;padding:20px}
-.gate-box{background:var(--card);border-radius:12px;padding:32px 28px;max-width:340px;
-  width:100%;box-shadow:0 4px 24px rgba(0,0,0,.10)}
-.gate-box h2{font-size:17px;color:var(--accent);margin-bottom:6px}
-.gate-box p{font-size:13px;color:var(--sub);margin-bottom:20px}
-.gate-box input{width:100%;padding:10px 12px;border:1.5px solid var(--border);
-  border-radius:8px;font-size:15px;margin-bottom:12px;outline:none}
-.gate-box input:focus{border-color:var(--accent2)}
-.gate-box button{width:100%;padding:11px;background:var(--accent);color:#fff;
-  border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
-.gate-box button:active{opacity:.85}
-#gate-err{color:var(--crit);font-size:13px;margin-top:8px;display:none}
-
 /* Layout */
-#app{display:none}
+#app{display:block}
 .hdr{background:var(--accent);color:#fff;padding:14px 16px;border-radius:10px;margin-bottom:12px}
 .hdr h1{font-size:17px;font-weight:700}
 .hdr p{font-size:11px;opacity:.75;margin-top:3px}
@@ -94,17 +78,6 @@ td.obs{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
 </head>
 <body>
 
-<!-- Gate -->
-<div id="gate">
-  <div class="gate-box">
-    <h2>Desmontajes Pendientes RIC</h2>
-    <p>Acceso restringido. Ingresá la clave para continuar.</p>
-    <input type="password" id="pwd" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkPwd()">
-    <button onclick="checkPwd()">Ingresar</button>
-    <div id="gate-err">Clave incorrecta.</div>
-  </div>
-</div>
-
 <div id="app">
   <div class="hdr">
     <h1>&#9881; Desmontajes Pendientes &mdash; RIC</h1>
@@ -167,22 +140,8 @@ td.obs{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
 </div>
 
 <script>
-const PWD_HASH = "e1a10da51b5130027af9e12cdc2f3f90030c302b830db021a9816ff23fbee279";
 const ROWS = [{"sm":599151,"clase":"DESM_GPRS","asesor":"DUN","cli":"QUIROGA DIAZ, ESTEBAN ANTONIELL","cod":"1016923","ciu":"","fc":"2026-01-10","fco":"2026-01-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599207,"clase":"DESM_GPRS","asesor":"LMV","cli":"BRISTOL SA","cod":"17325","ciu":"","fc":"2026-01-10","fco":"2026-01-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599587,"clase":"DESMGPS","asesor":"NAR","cli":"AMAZONAS EAS UNIPERSONAL","cod":"1112714","ciu":"","fc":"2026-02-10","fco":"2026-02-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599592,"clase":"DESMGPS","asesor":"NAR","cli":"AMAZONAS EAS UNIPERSONAL","cod":"1112716","ciu":"","fc":"2026-02-10","fco":"2026-02-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599160,"clase":"DESM_GPRS","asesor":"MAF","cli":"IMPRODERMA SRL","cod":"1089052","ciu":"","fc":"2026-01-10","fco":"2026-05-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599304,"clase":"DESMCAM","asesor":"NAR","cli":"GONZALEZ COUSIÑO, RONALDO DANIEL","cod":"1110247","ciu":"","fc":"2026-01-10","fco":"2026-02-10","tec":"IVAN PAREDES","st":1,"obs":""},{"sm":599404,"clase":"DESMONT","asesor":"NAR","cli":"TELEVENTAS PARAGUAY S.R.L.","cod":"1071863","ciu":"","fc":"2026-02-10","fco":"2026-02-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599474,"clase":"DESM_GPRS","asesor":"MAF","cli":"WAGNER BENDLIN, GERARDO MARTIN WALTER","cod":"1047076","ciu":"","fc":"2026-02-10","fco":"2026-06-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599515,"clase":"DESMGPS","asesor":"NG","cli":"VAZQUEZ VILLALBA, GUSTAVO ENRIQUE","cod":"1102229","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"MARIANA NAIR GIMENEZ","st":1,"obs":""},{"sm":599529,"clase":"DESMGPS","asesor":"NAR","cli":"AMAZONAS EAS UNIPERSONAL","cod":"1112720","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599540,"clase":"DESMGPS","asesor":"NAR","cli":"AMAZONAS EAS UNIPERSONAL","cod":"1112711","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599577,"clase":"DESMGPS","asesor":"NAR","cli":"ULIAMBRE SOTELO, CAROLINA","cod":"1074564","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599618,"clase":"DESMGPS","asesor":"RPA","cli":"CABRERA BENITEZ, PAMELA ROSSANA","cod":"1082305","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599619,"clase":"DESMGPS","asesor":"RPA","cli":"ECHAURI MARTINEZ, MIRTA RAQUEL","cod":"1094889","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599635,"clase":"DESM_GPRS","asesor":"NAR","cli":"GONZALEZ AQUINO, ARNALDO","cod":"1105730","ciu":"","fc":"2026-03-10","fco":"2026-05-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599675,"clase":"DESM_GPRS","asesor":"NAR","cli":"ARRUA, ENRIQUE VICTOR","cod":"1045076","ciu":"","fc":"2026-03-10","fco":"2026-05-10","tec":"Natascha Angelina Rassl","st":1,"obs":""},{"sm":599612,"clase":"DESMGPS","asesor":"JPC","cli":"SOSA HILDEBRAND, JOSE DANIEL","cod":"1053159","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599071,"clase":"DESMONT","asesor":"NDG","cli":"GODOY DE GIMENEZ, LEIDY DIANA","cod":"1009956","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599072,"clase":"DESMONT","asesor":"NDG","cli":"FRETES CORVALAN, DANIEL","cod":"1036353","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599076,"clase":"DESMGPS","asesor":"NDG","cli":"JARA RUIZ, FRANCISCO","cod":"1049944","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599077,"clase":"DESMGPS","asesor":"NDG","cli":"HUG BENITEZ, RODRIGO MATHIAS","cod":"1051795","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599078,"clase":"DESMGPS","asesor":"NDG","cli":"BRITEZ BENITEZ, MICHAEL","cod":"1079951","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599081,"clase":"DESMGPS","asesor":"NDG","cli":" RECAUCHUTADORA INDUSTRIAL DEL PARAGUAY  SRL","cod":"1029058","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599082,"clase":"DESMGPS","asesor":"NDG","cli":"JIMENEZ MARTINI, JOSE NOEL","cod":"1051109","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599083,"clase":"DESMONT","asesor":"NDG","cli":"VERA TORRES, IVANNA JOANNA","cod":"1083006","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599087,"clase":"DESMGPS","asesor":"NDG","cli":"ROMERO BENITEZ, JULIO CESAR","cod":"1069378","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599089,"clase":"DESMGPS","asesor":"NDG","cli":"MARTINEZ MENDOZA, ORLANDO HERIBERTO","cod":"1082043","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599090,"clase":"DESMGPS","asesor":"NDG","cli":"CARDOZO AYALA, MIRNA ALEJANDRA","cod":"1067520","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599150,"clase":"DESMONT","asesor":"NDG","cli":"SILVA ESTECHE, VICTOR ARTURO","cod":"1076381","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599303,"clase":"DESMGPS","asesor":"JPC","cli":"RODRIGUEZ CANTERO, VICTOR SAMUEL","cod":"1080493","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599457,"clase":"DESM_GPRS","asesor":"JPC","cli":"GRIT S.A","cod":"1049961","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599469,"clase":"DESM_GPRS","asesor":"JPC","cli":"CASTILLO SAENZ, MIGUEL ANGEL","cod":"1072003","ciu":"","fc":"2026-02-10","fco":"2026-05-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599477,"clase":"DESMGPS","asesor":"NDG","cli":"MENDIETA DIAZ, ROMINA ELIZABETH","cod":"1035724","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599478,"clase":"DESMONT","asesor":"NDG","cli":"SILVA ESTECHE, VICTOR ARTURO","cod":"1076380","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599480,"clase":"DESMONT","asesor":"NDG","cli":"RAMIREZ FRUTOS, JOSE RUBEN","cod":"1003481","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599482,"clase":"DESMGPS","asesor":"NDG","cli":"COHENE IRALA, VICENTE","cod":"1031547","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599483,"clase":"DESMGPS","asesor":"NDG","cli":"BOGADO ESPINOZA, VICTOR ANIBAL","cod":"1074884","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599485,"clase":"DESMONT","asesor":"NDG","cli":"CROCCO ROA, JULIAN ALEJANDRO","cod":"1075654","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599682,"clase":"DESMGPS","asesor":"XB","cli":"CYNTHIA CAROLINA, AYALA ALVAREZ","cod":"1030269","ciu":"","fc":"2026-04-10","fco":"","tec":"","st":0,"obs":""},{"sm":599604,"clase":"DESMGPS","asesor":"DUN","cli":"ESTIGARRIBIA ORTIZ, MIGUEL","cod":"1047103","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599073,"clase":"DESMGPS","asesor":"NDG","cli":"GONZALEZ, ALEJANDRA YAMILA","cod":"1022461","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599074,"clase":"DESMGPS","asesor":"NDG","cli":"GONZALEZ, ALEJANDRA YAMILA","cod":"1022462","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599079,"clase":"DESMGPS","asesor":"NDG","cli":"ZARATE BAREIRO, YENIFER ANTONELA","cod":"1096310","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599080,"clase":"DESMGPS","asesor":"NDG","cli":"VALDEZ MORINIGO, MILENA MARIBEL","cod":"1044361","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599084,"clase":"DESMONT","asesor":"NDG","cli":"JACQUET GODOY, VICTOR MARCELINO","cod":"10631","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599085,"clase":"DESMONT","asesor":"NDG","cli":"PAREDEZ DE ALONSO, MARINA","cod":"1072554","ciu":"","fc":"2026-01-10","fco":"2026-05-10","tec":"MARTA DOMINGA AGÃœERO","st":1,"obs":""},{"sm":599183,"clase":"DESM_GPRS","asesor":"LMV","cli":"GAMARRA FRETES, RICHARD ANTONIO","cod":"8027","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599299,"clase":"DESMCAM","asesor":"NAR","cli":"GONZALEZ COUSIÑO, RONALDO DANIEL","cod":"1110251","ciu":"","fc":"2026-01-10","fco":"2026-02-10","tec":"IVAN PAREDES","st":1,"obs":""},{"sm":599326,"clase":"DESMONT","asesor":"XB","cli":"DOMINGUEZ IRALA, CRISTIAN RODRIGO","cod":"1098998","ciu":"","fc":"2026-01-10","fco":"","tec":"","st":0,"obs":""},{"sm":599407,"clase":"DESM_GPRS","asesor":"LMV","cli":"FRANCO REPUESTOS","cod":"13834","ciu":"","fc":"2026-02-10","fco":"2026-02-10","tec":"ADAN EDUARDO ROMAN","st":1,"obs":""},{"sm":599479,"clase":"DESMCAM","asesor":"NDG","cli":"M.T. CONSTRUCCIONES S.A.","cod":"1059320","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599484,"clase":"DESMONT","asesor":"NDG","cli":"JARA AGUILERA, FRANCISCO ARIEL","cod":"1070227","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599486,"clase":"DESMGPS","asesor":"NDG","cli":"AMARILLA MIRANDA, TANIA BELEN","cod":"1112513","ciu":"","fc":"2026-02-10","fco":"","tec":"","st":0,"obs":""},{"sm":599487,"clase":"DESM_GPRS","asesor":"NDG","cli":"MIRANDA VILLAVERDE, ALBERTO","cod":"1024470","ciu":"","fc":"2026-02-10","fco":"2026-02-11","tec":"VIVIANA EDITH CHAVEZ","st":1,"obs":""}];
 const HOY = new Date(); HOY.setHours(0,0,0,0);
-
-async function checkPwd(){
-  const v = document.getElementById('pwd').value;
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
-  const hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  if(hex===PWD_HASH){
-    document.getElementById('gate').style.display='none';
-    document.getElementById('app').style.display='block';
-    init();
-  } else {
-    document.getElementById('gate-err').style.display='block';
-  }
-}
 
 function dias(fc){
   if(!fc) return 0;
@@ -311,6 +270,8 @@ function showTab(id,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
 }
+
+window.onload = init;
 </script>
 </body>
 </html>
