@@ -259,7 +259,6 @@
     periodEl.textContent = fmtDate(DATA.period_start) + " – " + fmtDate(DATA.period_end);
     document.getElementById("footer-note").innerHTML =
       "Snapshot generado el " + fmtDateTime(DATA.generated_at) + " a partir de la API de DataScope (formularios “Asistencia Técnica” y “Asistencia Técnica RIC”). " +
-      "No se actualiza solo &mdash; para ver datos nuevos hay que pedir un snapshot nuevo. " +
       "El buscador filtra por ID de documento, técnico (cuenta o nombre declarado) y número de Solicitud de Mantenimiento. " +
       "La columna <b>Documento</b> descarga el comprobante PDF generado automáticamente por DataScope para esa boleta (público, sin necesidad de iniciar sesión). " +
       "El técnico se identifica por la <b>cuenta</b> que cargó la boleta en la app, no por el campo de texto libre “Técnico” (ese campo tiene errores de tipeo frecuentes). " +
