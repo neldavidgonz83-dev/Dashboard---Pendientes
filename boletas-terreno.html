@@ -192,6 +192,7 @@
     <input type="text" id="search-box" placeholder="Buscar por ID de documento, técnico o N° de solicitud de mantenimiento...">
     <select id="tecnico-select"><option value="">Todos los técnicos</option></select>
     <select id="problema-select"><option value="">Todos los problemas</option></select>
+    <select id="rec-select"><option value="">Recomendación: todas</option><option value="SI">Recomendación: SI</option><option value="NO">Recomendación: NO</option></select>
   </div>
   <div class="table-scroll">
     <table class="detail">
@@ -217,7 +218,7 @@
 <script>
 (function(){
   var DATA = null, FILTER = "all", PAGE = 1, PAGE_SIZE = 25;
-  var SEARCH = "", TEC_FILTER = "", PROB_FILTER = "";
+  var SEARCH = "", TEC_FILTER = "", PROB_FILTER = "", REC_FILTER = "";
 
   function fmtGs(n){
     if(n==null || isNaN(n)) return "—";
@@ -463,6 +464,7 @@
     var rows = filteredData().filter(function(r){
       if(TEC_FILTER && r.tecnico!==TEC_FILTER) return false;
       if(PROB_FILTER && r.tipo_problema!==PROB_FILTER) return false;
+      if(REC_FILTER && r.recomendacion!==REC_FILTER) return false;
       if(SEARCH){
         var hay = (r.tecnico+" "+r.tecnico_declarado+" "+(r.cliente||"")+" "+(r.codigo_monitoreo||"")+" "+(r.code||"")+
           " "+(r.solicitud_mantenimiento||"")+" "+(r.solicitud_mantenimiento_2||"")+" "+r.tipo_problema).toLowerCase();
@@ -520,6 +522,7 @@
   document.getElementById("search-box").addEventListener("input", function(e){ SEARCH = e.target.value; PAGE=1; renderDetailTable(); });
   document.getElementById("tecnico-select").addEventListener("change", function(e){ TEC_FILTER = e.target.value; PAGE=1; renderDetailTable(); });
   document.getElementById("problema-select").addEventListener("change", function(e){ PROB_FILTER = e.target.value; PAGE=1; renderDetailTable(); });
+  document.getElementById("rec-select").addEventListener("change", function(e){ REC_FILTER = e.target.value; PAGE=1; renderDetailTable(); });
   document.getElementById("pg-prev").addEventListener("click", function(){ if(PAGE>1){PAGE--; renderDetailTable();} });
   document.getElementById("pg-next").addEventListener("click", function(){ PAGE++; renderDetailTable(); });
 
