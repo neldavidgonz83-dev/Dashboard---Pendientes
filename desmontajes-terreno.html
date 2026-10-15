@@ -157,6 +157,34 @@
   </div>
 </header>
 
+<style>
+  .tabbar{display:flex; gap:6px; margin-bottom:16px; background:var(--surface-2); padding:4px; border-radius:10px; border:1px solid var(--border); width:fit-content; max-width:100%;}
+  .tabbar button{appearance:none; border:none; background:transparent; color:var(--text-2); padding:9px 18px; border-radius:7px; font:inherit; font-size:14px; font-weight:600; cursor:pointer;}
+  .tabbar button.active{background:var(--accent); color:#fff;}
+  .tabbar button:not(.active):hover{background:var(--surface-3); color:var(--text);}
+  .mis-pick{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
+  .mis-pick select{font:inherit; font-size:15px; padding:10px 12px; border-radius:9px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text); flex:1; min-width:220px; max-width:420px;}
+  .sm-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:10px;}
+  .sm-card{background:var(--surface); border:1px solid var(--border); border-left:5px solid var(--accent); border-radius:12px; padding:12px 14px; box-shadow:var(--shadow);}
+  .sm-card.warn{border-left-color:var(--warning);} .sm-card.crit{border-left-color:var(--critical);} .sm-card.ok{border-left-color:var(--good);}
+  .sm-card .sm-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .sm-card .sm-num{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:20px;}
+  .sm-card .sm-days{font-size:12px; font-weight:700; padding:2px 9px; border-radius:99px; background:var(--surface-3); color:var(--text-2); white-space:nowrap;}
+  .sm-card.warn .sm-days{background:var(--warning-soft); color:var(--warning);} .sm-card.crit .sm-days{background:var(--critical-soft); color:var(--critical);}
+  .sm-card .sm-row{display:flex; justify-content:space-between; gap:8px; font-size:13px; color:var(--text-2); margin-top:5px;}
+  .sm-card .sm-row b{color:var(--text); font-weight:600;}
+  .sm-card .sm-addr{margin-top:8px; font-size:14px; font-weight:600; line-height:1.3;}
+  .sm-card .sm-addr small{display:block; font-weight:500; color:var(--text-2); font-size:12.5px; margin-top:2px;}
+  .sm-card .sm-map{display:inline-block; margin-top:8px; padding:6px 12px; border-radius:8px; background:var(--accent-soft); color:var(--accent-ink); font-size:13px; font-weight:600; text-decoration:none;}
+  .sm-card .sm-sit{margin-top:8px; font-size:12px; font-weight:600;}
+</style>
+<div class="tabbar" id="tabbar">
+  <button data-tab="seg" class="active">Seguimiento</button>
+  <button data-tab="mis">Mis SM</button>
+</div>
+
+<div id="tab-seg">
+
 <div class="kpis" id="kpi-row"></div>
 
 <section class="panel" id="bi-section" style="display:none">
@@ -240,6 +268,30 @@
 
 <footer id="footer-note">Cargando…</footer>
 
+</div><!-- /tab-seg -->
+
+<div id="tab-mis" style="display:none">
+  <section class="panel">
+    <h2>Mis solicitudes de desmontaje</h2>
+    <div class="panel-sub" id="mis-sub">Elegí tu nombre para ver las SM que tenés asignadas.</div>
+    <div class="mis-pick">
+      <select id="mis-tec"><option value="">— Elegí tu nombre —</option></select>
+    </div>
+    <div id="mis-body" style="display:none">
+      <div class="kpis" id="mis-kpis" style="margin-bottom:14px"></div>
+      <div class="filters" id="mis-filters" style="display:inline-flex; margin-bottom:12px; flex-wrap:wrap">
+        <button data-est="Pendiente" class="active">Pendientes</button>
+        <button data-est="Realizado sin ficha">Falta cargar ficha</button>
+        <button data-est="Realizado con ficha">Realizados</button>
+      </div>
+      <div class="detail-toolbar"><input type="text" id="mis-search" placeholder="Buscar por SM, caso o dirección..."><select id="mis-city"><option value="">Todas las ciudades</option></select></div>
+      <div class="sm-list" id="mis-list"></div>
+      <div class="pager"><button id="mis-prev">&larr; Anterior</button><span id="mis-info">—</span><button id="mis-next">Siguiente &rarr;</button></div>
+    </div>
+  </section>
+</div>
+
+
 <script>
 (function(){
   var DATA = null, PAGE = 1, PAGE_SIZE = 25, SEARCH = "", TEC = "", EQ = "";
@@ -257,7 +309,7 @@
     return d.toLocaleDateString("es-PY")+" "+d.toLocaleTimeString("es-PY",{hour:"2-digit",minute:"2-digit"}); }
 
   fetch(DATA_URL).then(function(r){return r.json();}).then(function(d){
-    DATA = d; buildOptions(); render(); initBi();
+    DATA = d; buildOptions(); render(); initBi(); initMis();
   }).catch(function(e){ document.getElementById("footer-note").textContent = "No se pudieron cargar los datos ("+e+")."; });
 
   function buildOptions(){
@@ -467,5 +519,82 @@
   document.getElementById("bi-cre").addEventListener("change", function(e){ BI_CRE=e.target.value; BI_PAGE=1; renderBiTable(); });
   document.getElementById("bi-prev").addEventListener("click", function(){ if(BI_PAGE>1){BI_PAGE--; renderBiTable();} });
   document.getElementById("bi-next").addEventListener("click", function(){ BI_PAGE++; renderBiTable(); });
+  /* ===== Pestañas + Mis SM ===== */
+  function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  var MIS_EST = "Pendiente", MIS_PAGE = 1, MIS_SEARCH = "", MIS_TEC = "", MIS_CITY = "", MIS_SIZE = 20;
+  function showTab(t){
+    document.getElementById("tab-seg").style.display = t==="mis" ? "none" : "";
+    document.getElementById("tab-mis").style.display = t==="mis" ? "" : "none";
+    document.querySelectorAll("#tabbar button").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab")===t); });
+    try{ history.replaceState(null,"", t==="mis" ? "#mis" : location.pathname+location.search); }catch(e){}
+  }
+  document.getElementById("tabbar").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(b) showTab(b.getAttribute("data-tab")); });
+  function initMis(){
+    if(location.hash==="#mis") showTab("mis");
+    if(!DATA.bi){ document.getElementById("mis-sub").textContent="Sin datos de Power BI todavía."; return; }
+    document.getElementById("mis-sub").innerHTML = "Datos de Power BI hasta el <b>"+fmtDate(DATA.bi.bi_data_until)+"</b>. Elegí tu nombre para ver las SM que tenés asignadas.";
+    var cnt = {};
+    DATA.bi.items.forEach(function(i){ if(i.tecnico && i.estado!=="Realizado con ficha") cnt[i.tecnico]=1; });
+    var sel = document.getElementById("mis-tec");
+    Object.keys(cnt).sort().forEach(function(t){ var o=document.createElement("option"); o.value=t; o.textContent=t; sel.appendChild(o); });
+    var q = new URLSearchParams(location.search).get("tec");
+    var saved = q || lsGet("desm_mis_tec");
+    if(saved && cnt[saved]){ sel.value = saved; MIS_TEC = saved; }
+    renderMis();
+  }
+  function renderMis(){
+    var body = document.getElementById("mis-body");
+    if(!MIS_TEC){ body.style.display="none"; return; }
+    body.style.display="";
+    var mine = biItems().filter(function(i){ return i.tecnico===MIS_TEC; });
+    var cs = document.getElementById("mis-city"), cities = {};
+    mine.forEach(function(i){ if(i.estado!=="Realizado con ficha") cities[i.ciudad||"(sin ciudad)"]=1; });
+    var cl = Object.keys(cities).sort();
+    if(MIS_CITY && !cities[MIS_CITY]) MIS_CITY="";
+    cs.innerHTML = '<option value="">Todas las ciudades</option>'+cl.map(function(x){return '<option value="'+esc(x)+'"'+(x===MIS_CITY?' selected':'')+'>'+esc(x)+'</option>';}).join("");
+    var c = {"Pendiente":0,"Realizado sin ficha":0,"Realizado con ficha":0}, viejas = 0;
+    mine.forEach(function(i){ c[i.estado]++; if(i.estado==="Pendiente" && i.dias!=null && i.dias>14) viejas++; });
+    var tiles = [
+      {label:"Pendientes", value:fmtNum(c["Pendiente"]), ctx:"SM por hacer"},
+      {label:"Más de 14 días", value:fmtNum(viejas), ctx:"pendientes atrasadas", flag:viejas>0},
+      {label:"Falta cargar ficha", value:fmtNum(c["Realizado sin ficha"]), ctx:"hechas en sistema, sin ficha", flag:c["Realizado sin ficha"]>0},
+      {label:"Realizados", value:fmtNum(c["Realizado con ficha"]), ctx:"con ficha cargada"}
+    ];
+    document.getElementById("mis-kpis").innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.flag?' flag':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="ctx">'+esc(t.ctx)+'</div></div>'; }).join("");
+    var rows = mine.filter(function(i){
+      if(i.estado!==MIS_EST) return false;
+      if(MIS_CITY && (i.ciudad||"(sin ciudad)")!==MIS_CITY) return false;
+      if(MIS_SEARCH && (String(i.sm)+" "+(i.caso||"")+" "+(i.direccion||"")+" "+(i.ciudad||"")).toLowerCase().indexOf(MIS_SEARCH.toLowerCase())===-1) return false;
+      return true;
+    }).sort(function(a,b){ return (b.dias==null?-1:b.dias)-(a.dias==null?-1:a.dias); });
+    var total=rows.length, pages=Math.max(1,Math.ceil(total/MIS_SIZE));
+    if(MIS_PAGE>pages) MIS_PAGE=pages;
+    var slice = rows.slice((MIS_PAGE-1)*MIS_SIZE,(MIS_PAGE-1)*MIS_SIZE+MIS_SIZE);
+    document.getElementById("mis-list").innerHTML = slice.map(function(i){
+      var cls = i.estado==="Pendiente" ? (i.dias!=null && i.dias>14 ? "crit" : (i.dias!=null && i.dias>7 ? "warn" : "")) : (i.estado==="Realizado sin ficha" ? "warn" : "ok");
+      var sit = i.estado==="Pendiente" ? (i.dias!=null && i.dias>14 ? "Pendiente hace más de 14 días" : "Pendiente") : (i.estado==="Realizado sin ficha" ? "Cargá la ficha en DataScope" : "Ficha cargada");
+      return '<div class="sm-card '+cls+'"><div class="sm-top"><span class="sm-num">SM '+i.sm+'</span><span class="sm-days">'+(i.dias==null?"—":i.dias+" días")+'</span></div>'+
+        (i.direccion||i.ciudad ? '<div class="sm-addr">'+esc(i.direccion||"Sin dirección")+'<small>'+esc(i.ciudad||"")+'</small></div>'+(i.direccion?'<a class="sm-map" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(i.direccion+", "+(i.ciudad||"")+", Paraguay")+'">📍 Abrir en Maps</a>':'') : '')+
+        '<div class="sm-row"><span>Tipo</span><b>'+esc(i.grupo)+'</b></div>'+
+        '<div class="sm-row"><span>Caso</span><b class="mono">'+(i.caso||"—")+'</b></div>'+
+        '<div class="sm-row"><span>Fecha coord./trans.</span><b class="mono">'+fmtDate(i.fecha)+'</b></div>'+
+        '<div class="sm-row"><span>Estado BI</span><b>'+esc(i.status+" · "+(BI_STATUS[i.status]||""))+'</b></div>'+
+        '<div class="sm-sit">'+sit+'</div></div>';
+    }).join("") || '<div style="color:var(--muted);font-size:13px;padding:14px">Sin SM en esta categoría.</div>';
+    document.getElementById("mis-info").textContent = "Página "+MIS_PAGE+" de "+pages+" · "+fmtNum(total)+" SM";
+    document.getElementById("mis-prev").disabled = MIS_PAGE<=1; document.getElementById("mis-next").disabled = MIS_PAGE>=pages;
+  }
+  document.getElementById("mis-tec").addEventListener("change", function(e){ MIS_TEC=e.target.value; lsSet("desm_mis_tec",MIS_TEC); MIS_PAGE=1; renderMis(); });
+  document.getElementById("mis-filters").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    document.querySelectorAll("#mis-filters button").forEach(function(x){x.classList.remove("active");}); b.classList.add("active");
+    MIS_EST=b.getAttribute("data-est"); MIS_PAGE=1; renderMis(); });
+  document.getElementById("mis-city").addEventListener("change", function(e){ MIS_CITY=e.target.value; MIS_PAGE=1; renderMis(); });
+  document.getElementById("mis-search").addEventListener("input", function(e){ MIS_SEARCH=e.target.value.trim(); MIS_PAGE=1; renderMis(); });
+  document.getElementById("mis-prev").addEventListener("click", function(){ if(MIS_PAGE>1){MIS_PAGE--; renderMis();} });
+  document.getElementById("mis-next").addEventListener("click", function(){ MIS_PAGE++; renderMis(); });
 })();
 </script>
