@@ -325,7 +325,6 @@
     document.getElementById("footer-note").innerHTML =
       "Snapshot generado el "+fmtDateTime(DATA.generated_at)+" a partir de la API de DataScope (formulario “Desmontajes de Equipos”). "+
       "El formulario “Desmontajes de Equipos (Protek)” no tuvo respuestas en los últimos 30 días y por eso no figura. "+
-      "No se actualiza solo &mdash; para ver datos nuevos hay que pedir un snapshot nuevo. "+
       "La columna <b>Boleta</b> descarga el comprobante PDF generado por DataScope (aparece “—” si todavía no lo generó). "+
       "El técnico se identifica por la <b>cuenta</b> que cargó la ficha en la app, no por el campo de texto libre “Técnico”. "+
       "El ⚠ indica que en una parte relevante de sus fichas el nombre escrito no coincide con el de la cuenta (posible cuenta o dispositivo compartido).";
@@ -453,7 +452,6 @@
     document.getElementById("bi-section").style.display = "";
     var b = DATA.bi;
     document.getElementById("bi-sub").innerHTML = "Datos de Power BI hasta el <b>"+fmtDate(b.bi_data_until)+"</b> (último refresco del modelo; snapshot del "+fmtDateTime(b.snapshot_at)+"). "+
-      "Las fichas de DataScope se actualizan cada noche; las solicitudes nuevas de Power BI se suman al refrescar el snapshot."+
       (b.casos_sin_creador? " <b>"+fmtNum(b.casos_sin_creador)+"</b> solicitudes aun no tienen el creador del caso (la tabla de casos del modelo esta mas atrasada que la de solicitudes).":"");
     var tec = Array.from(new Set(b.items.map(function(i){return i.tecnico||"Sin técnico";}))).sort();
     var ts = document.getElementById("bi-tec"); tec.forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent=t;ts.appendChild(o);});
