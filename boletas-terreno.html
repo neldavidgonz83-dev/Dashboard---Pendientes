@@ -135,6 +135,7 @@
   .table-scroll{overflow-x:auto; max-height:520px; overflow-y:auto; border:1px solid var(--border); border-radius:10px;}
   .pill{display:inline-block; padding:2px 8px; border-radius:99px; font-size:10.5px; font-weight:600;}
   .pill.at{background:var(--accent-soft); color:var(--accent-ink);}
+  .pill.rec-si{background:var(--good-soft); color:var(--good);}
   .pill.ric{background:var(--accent2-soft); color:var(--accent2);}
   .ev-links{display:flex; gap:6px; font-size:11px;}
   .ev-links a{white-space:nowrap;}
@@ -196,7 +197,7 @@
     <table class="detail">
       <thead>
         <tr>
-          <th>ID Doc.</th><th>Fecha</th><th>Técnico</th><th>Form.</th><th>Tipo de problema</th>
+          <th>ID Doc.</th><th>Fecha</th><th>Técnico</th><th>Form.</th><th>Tipo de problema</th><th>Recomendación</th>
           <th style="text-align:right">Costo M.O.</th><th style="text-align:right">Duración</th>
           <th>Cliente / Cód.</th><th>Zona</th><th>Sol. Mtto.</th><th>Evidencia</th><th>Documento</th>
         </tr>
@@ -493,6 +494,7 @@
         '<td>'+esc(r.tecnico)+'</td>' +
         '<td><span class="pill '+pillClass+'">'+pillLabel+'</span></td>' +
         '<td>'+esc(r.tipo_problema)+'</td>' +
+        '<td>'+(r.recomendacion==="SI" ? '<span class="pill rec-si">SI</span>' : 'NO')+'</td>' +
         '<td class="num mono">'+fmtGs(r.costo_mo)+'</td>' +
         '<td class="num mono">'+fmtDur(r.duracion_min)+'</td>' +
         '<td>'+clienteTxt+'</td>' +
@@ -501,7 +503,7 @@
         '<td class="ev-links">'+(ev.join(" · ")||"—")+'</td>' +
         '<td>'+docLink+'</td>' +
         '</tr>';
-    }).join("") || '<tr><td colspan="12" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
+    }).join("") || '<tr><td colspan="13" style="color:var(--muted);text-align:center;padding:20px">Sin resultados para estos filtros.</td></tr>';
 
     document.getElementById("pg-info").textContent = "Página "+PAGE+" de "+totalPages+" · "+fmtNum(total)+" boletas";
     document.getElementById("pg-prev").disabled = PAGE<=1;
