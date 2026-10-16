@@ -444,7 +444,7 @@
   document.getElementById("pg-next").addEventListener("click", function(){ PAGE++; renderTable(); });
 
   /* ===== Seguimiento contra Power BI ===== */
-  var BI_STATUS = {0:"Sin coordinar",1:"Coordinado",3:"Realizado",4:"Estado 4",5:"Estado 5",6:"Realizado (cerrado)"};
+  var BI_STATUS = {0:"Iniciado",1:"Asignado",2:"Asignado",3:"Finalizado",4:"Rechazado",5:"Pendiente",6:"En Proceso"};
   var BI_EST = "Pendiente", BI_PAGE = 1, BI_SEARCH = "", BI_TEC = "", BI_GRP = "", BI_CRE = "";
   function biItems(){ return (DATA && DATA.bi) ? DATA.bi.items : []; }
   function initBi(){
@@ -467,9 +467,9 @@
     all.forEach(function(i){ c[i.estado]++; });
     var realizados = c["Realizado con ficha"]+c["Realizado sin ficha"];
     var tiles = [
-      {label:"Pendientes", value:fmtNum(c["Pendiente"]), ctx:"estados 0, 1, 4 y 5 sin ficha"},
+      {label:"Pendientes", value:fmtNum(c["Pendiente"]), ctx:"Iniciado, Asignado y Pendiente, sin ficha"},
       {label:"Realizados con ficha", value:fmtNum(c["Realizado con ficha"]), ctx:"ficha cargada en DataScope"},
-      {label:"Realizados sin ficha", value:fmtNum(c["Realizado sin ficha"]), ctx:"estado 3/6 en BI, sin ficha", flag: c["Realizado sin ficha"]>0},
+      {label:"Realizados sin ficha", value:fmtNum(c["Realizado sin ficha"]), ctx:"Finalizado o En Proceso en BI, sin ficha", flag: c["Realizado sin ficha"]>0},
       {label:"Cobertura de ficha", value:(realizados?(100*c["Realizado con ficha"]/realizados).toFixed(0):"0")+"%", ctx:"de los realizados tienen ficha"}
     ];
     document.getElementById("bi-kpis").innerHTML = tiles.map(function(t){
