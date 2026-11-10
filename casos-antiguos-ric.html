@@ -24,8 +24,8 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .scroll{overflow-x:auto}
 </style></head><body><div class="wrap">
 <h1>Casos más antiguos por asesor</h1>
-<div class="sub">Casos RIC en estado Requerimiento, Pedido, Seguimiento o Pendiente · datos al 2026-11-10 · ordenados del más antiguo al más reciente</div>
-<div class="bar"><label for="f"><b>Asignado</b></label><select id="f"></select></div>
+<div class="sub">Casos RIC en estado Requerimiento, Pedido, Seguimiento o Pendiente · datos al 2026-11-10 · orden configurable</div>
+<div class="bar"><label for="f"><b>Asignado</b></label><select id="f"></select><label for="o"><b>Ordenar por</b></label><select id="o"><option value="cre">Más antiguos (fecha de creación)</option><option value="ges">Más días sin gestión (mayor a menor)</option></select></div>
 <div class="kpis" id="k"></div><div id="out"></div>
 <script>
 const SNAP=new Date("2026-11-10T00:00:00");
@@ -34,14 +34,18 @@ const age=f=>Math.round((SNAP-new Date(f+"T00:00:00"))/864e5);
 const cls=d=>d>=100?"d-r":d>=30?"d-a":"d-g";
 const fmt=f=>f.split("-").reverse().join("/");
 const by={};D.forEach(r=>{(by[r[2]]=by[r[2]]||[]).push(r)});
-Object.values(by).forEach(a=>a.sort((x,y)=>x[4].localeCompare(y[4])||x[0]-y[0]));
-const names=Object.keys(by).sort((a,b)=>by[a][0][4].localeCompare(by[b][0][4]));
+const G=r=>r[5]==null?-1:r[5];
+const cmp={cre:(x,y)=>x[4].localeCompare(y[4])||x[0]-y[0],ges:(x,y)=>G(y)-G(x)||x[4].localeCompare(y[4])};
+let names=[];
+function sortAll(){const m=document.getElementById("o").value;Object.values(by).forEach(a=>a.sort(cmp[m]));
+  names=Object.keys(by).sort((a,b)=>m==="ges"?G(by[b][0])-G(by[a][0]):by[a][0][4].localeCompare(by[b][0][4]));}
 const sel=document.getElementById("f");
-sel.innerHTML='<option value="">Todos los asesores</option>'+names.slice().sort().map(n=>`<option>${n.replace(/&/g,"&amp;")}</option>`).join("");
+sel.innerHTML='<option value="">Todos los asesores</option>'+Object.keys(by).sort().map(n=>`<option>${n.replace(/&/g,"&amp;")}</option>`).join("");
 const open={};const TOP=5;
 function rowsHtml(a){return `<div class="scroll"><table><thead><tr><th>Caso</th><th>Tema</th><th>Estado</th><th>Creado</th><th class="n">Antigüedad (d)</th><th class="n">Sin gestión (d)</th></tr></thead><tbody>`+
 a.map(r=>{const g=age(r[4]);return `<tr><td>#${r[0]}</td><td>${r[1]}</td><td><span class="tag">${r[3]}</span></td><td>${fmt(r[4])}</td><td class="n ${cls(g)}">${g}</td><td class="n ${cls(r[5]||0)}">${r[5]==null?"—":r[5]}</td></tr>`}).join("")+`</tbody></table></div>`}
 function render(){
+  sortAll();
   const v=sel.value;const list=v?[v]:names;
   const all=list.flatMap(n=>by[n]);
   const oldest=all.reduce((m,r)=>r[4]<m[4]?r:m,all[0]);
@@ -52,10 +56,10 @@ function render(){
     `<div class="k"><b>${all.filter(r=>age(r[4])>=100).length.toLocaleString("es")}</b><span>con 100 días o más</span></div>`;
   document.getElementById("out").innerHTML=list.map(n=>{
     const a=by[n];const full=v||open[n];const shown=full?a:a.slice(0,TOP);
-    const o=age(a[0][4]);
-    return `<div class="as"><div class="ah" data-n="${n.replace(/"/g,"&quot;")}"><strong>${n}</strong><small>${a.length} caso${a.length>1?"s":""} · el más antiguo: ${o} d (${fmt(a[0][4])})</small></div>`+rowsHtml(shown)+
+    const ol=a.reduce((m,r)=>r[4]<m[4]?r:m,a[0]);const o=age(ol[4]);const mg=Math.max(...a.map(G));
+    return `<div class="as"><div class="ah" data-n="${n.replace(/"/g,"&quot;")}"><strong>${n}</strong><small>${a.length} caso${a.length>1?"s":""} · el más antiguo: ${o} d (${fmt(ol[4])}) · máx. sin gestión: ${mg<0?"—":mg+" d"}</small></div>`+rowsHtml(shown)+
       (!v&&a.length>TOP?`<div class="more">${full?"Mostrando todos · tocar el nombre para contraer":`Mostrando los ${TOP} más antiguos de ${a.length} · tocar el nombre para ver todos`}</div>`:"")+`</div>`}).join("");
   if(!v)document.querySelectorAll(".ah").forEach(h=>h.onclick=()=>{open[h.dataset.n]=!open[h.dataset.n];render()});
 }
-sel.onchange=render;render();
+sel.onchange=render;document.getElementById("o").onchange=render;render();
 </script></div></body></html>
