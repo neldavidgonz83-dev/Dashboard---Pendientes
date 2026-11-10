@@ -1,0 +1,88 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><meta name="claude:viewport-fit-sides" content="cover">
+<title>Casos SAT urgentes</title>
+<style>
+/* Concepto: tablero de guardia, una lista corta y ordenada de casos que exigen llamar hoy. Mismo lenguaje (azul marino, rojo/ámbar de alerta) que Pendientes RIC. */
+:root{--bg:#f4f6fa;--card:#ffffff;--ink:#16243a;--mut:#5d6b80;--line:#e3e8f0;--navy:#1f3864;--red:#c8362e;--amb:#a86a00;--vio:#6b4fb3;--blu:#2a62c9;--chip:#eef1f6;--warn-bg:#fff4d6;--warn-ink:#6b4c00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1624;--card:#17223a;--ink:#e8edf5;--mut:#9aa8bd;--line:#26344f;--navy:#8fb0ee;--red:#ff7a70;--amb:#f5b84a;--vio:#b9a2f2;--blu:#7fb0ff;--chip:#223250;--warn-bg:#3a2d0c;--warn-ink:#f5d58a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1624;--card:#17223a;--ink:#e8edf5;--mut:#9aa8bd;--line:#26344f;--navy:#8fb0ee;--red:#ff7a70;--amb:#f5b84a;--vio:#b9a2f2;--blu:#7fb0ff;--chip:#223250;--warn-bg:#3a2d0c;--warn-ink:#f5d58a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,"Segoe UI",Roboto,sans-serif;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:22px;margin:0;color:var(--navy);text-wrap:balance}
+.sub{color:var(--mut);font-size:12.5px;margin:4px 0 12px;max-width:80ch}
+.warn{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:8px 12px;font-size:12.5px;margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.k b{display:block;font-size:24px;font-variant-numeric:tabular-nums}.k span{color:var(--mut);font-size:12px}
+.bar{display:flex;gap:10px 14px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}.f label{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+select,input[type=search]{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:150px;max-width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:12.5px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+.chip:focus-visible,select:focus-visible,input:focus-visible,th button:focus-visible{outline:2px solid var(--blu);outline-offset:2px}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:8px 12px;text-align:left;border-top:1px solid var(--line);font-size:13px;vertical-align:top}
+thead th{border-top:0;color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.d-r{color:var(--red);font-weight:700}.d-a{color:var(--amb);font-weight:600}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;background:var(--chip);white-space:nowrap}
+.w{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;font-weight:600;margin:0 4px 2px 0;border:1px solid currentColor}
+.w-molesta{color:var(--amb)}.w-cancelar{color:var(--red)}.w-harta{color:var(--vio)}.w-sedeco{color:var(--blu)}
+.empty{padding:22px;text-align:center;color:var(--mut)}
+.foot{color:var(--mut);font-size:12px;margin-top:12px;max-width:90ch}
+@media (max-width:560px){h1{font-size:19px}.k b{font-size:20px}}
+</style>
+<div class="wrap">
+<h1>Casos SAT urgentes</h1>
+<div class="sub">Casos de asistencia técnica abiertos desde el 01/01/2026 en Requerimiento, Seguimiento o Pedido, en las zonas de asistencia, cuyos comentarios mencionan <b>molesta</b>, <b>cancelar</b>, <b>harta</b> o <b>sedeco</b>. Estado de los casos al 10/11/2026.</div>
+<div class="warn" id="warn" hidden></div>
+<div class="kpis" id="k"></div>
+<div class="bar">
+  <div class="f"><label for="fa">Asesor</label><select id="fa"></select></div>
+  <div class="f"><label for="ft">Zona (Tema)</label><select id="ft"></select></div>
+  <div class="f"><label for="fq">Buscar caso</label><input id="fq" type="search" placeholder="N.° de caso" inputmode="numeric"></div>
+  <div class="f"><label for="fo">Ordenar por</label><select id="fo"><option value="ant">Más antiguos</option><option value="men">Mención más reciente</option><option value="ges">Gestión más antigua</option></select></div>
+</div>
+<div class="bar">
+  <div class="f"><label id="lw">Palabra</label><div class="chips" id="cw" role="group" aria-labelledby="lw"></div></div>
+  <div class="f"><label id="le">Estado</label><div class="chips" id="ce" role="group" aria-labelledby="le"></div></div>
+</div>
+<div class="tbl"><table><thead><tr><th>Caso</th><th>Zona</th><th>Asesor</th><th>Estado</th><th>Creado</th><th class="n">Antigüedad</th><th>Última gestión</th><th>Palabras</th><th>Mención</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="foot">Solo se listan número de caso, zona, asesor, estado y fechas: no se publican nombres de clientes ni el texto de los comentarios. La búsqueda detecta las palabras dentro de cualquier parte del comentario (por ejemplo "cancelar" también marca "cancelarlo"), por eso conviene leer el caso antes de actuar.</div>
+</div>
+<script>
+const SNAP=new Date("2026-11-10T00:00:00"),CORTE="2026-10-20",UNIV=3713;
+const D=[[1508358,"AtecCORPOVIP","RM","PEDIDO","2026-05-14","2026-05-27",["molesta"],"2026-05-25"],[1509252,"ATec6CAU","RM","REQUERIMIENTO","2026-05-18","2026-07-06",["molesta"],"2026-07-06"],[1520641,"ATec10CAU","RM","REQUERIMIENTO","2026-06-08","2026-06-23",["cancelar"],"2026-06-17"],[1522233,"ATec2CAU","RM","REQUERIMIENTO","2026-06-10","2026-06-17",["cancelar"],"2026-06-17"],[1528010,"ATec10CAU","RM","REQUERIMIENTO","2026-06-24","2026-06-26",["molesta"],"2026-06-26"],[1528736,"ATecSBCAU","RM","REQUERIMIENTO","2026-06-25","2026-06-26",["cancelar"],"2026-06-26"],[1530625,"ATecCDE2CAU","RM","PEDIDO","2026-06-30","2026-07-16",["cancelar"],"2026-07-16"],[1534041,"ATecCDE2CAU","RM","REQUERIMIENTO","2026-07-06","2026-07-31",["cancelar"],"2026-07-31"],[1535631,"ATec6CAU","RM","REQUERIMIENTO","2026-07-09","2026-07-13",["cancelar"],"2026-07-13"],[1536170,"ATec6CAU","RM","REQUERIMIENTO","2026-07-10","2026-07-13",["molesta"],"2026-07-13"],[1536284,"ATecSBCAU","RM","REQUERIMIENTO","2026-07-10","2026-07-21",["molesta"],"2026-07-10"],[1540242,"ATec10CAU","RM","REQUERIMIENTO","2026-07-17","2026-08-04",["cancelar"],"2026-07-24"],[1541045,"ATecCDE1CAU","LRR","PEDIDO","2026-07-20","2026-10-16",["cancelar"],"2026-09-09"],[1541299,"ATec7CAU","RM","REQUERIMIENTO","2026-07-21","2026-08-07",["cancelar"],"2026-08-07"],[1542382,"ATec5CAU","RM","REQUERIMIENTO","2026-07-22","2026-08-07",["molesta"],"2026-08-07"],[1547633,"ATecSBCAU","RM","REQUERIMIENTO","2026-08-03","2026-08-18",["cancelar"],"2026-08-18"],[1548796,"ATec7CAU","RM","REQUERIMIENTO","2026-08-04","2026-08-05",["cancelar"],"2026-08-05"],[1551587,"ATec1CAU","RM","REQUERIMIENTO","2026-08-10","2026-08-12",["cancelar"],"2026-08-12"],[1552654,"ATec4CAU","RM","REQUERIMIENTO","2026-08-11","2026-08-12",["cancelar"],"2026-08-12"],[1558682,"ATec2CAU","RM","REQUERIMIENTO","2026-08-22","2026-09-03",["cancelar"],"2026-08-28"],[1558845,"ATec9CAU","RM","REQUERIMIENTO","2026-08-24","2026-08-31",["molesta"],"2026-08-24"],[1559789,"ATec3CAU","RM","PEDIDO","2026-08-25","2026-09-25",["cancelar"],"2026-08-31"],[1566499,"ATec6CAU","RM","REQUERIMIENTO","2026-09-04","2026-09-11",["cancelar"],"2026-09-04"],[1572311,"ATecCDE1CAU","RM","REQUERIMIENTO","2026-09-15","2026-10-16",["molesta"],"2026-10-16"],[1573574,"ATec10CAU","RM","REQUERIMIENTO","2026-09-17","2026-09-21",["molesta"],"2026-09-21"],[1574273,"ATec2CAU","RM","REQUERIMIENTO","2026-09-17","2026-09-18",["cancelar"],"2026-09-18"],[1574341,"ATec12CAU","RM","REQUERIMIENTO","2026-09-18","2026-09-19",["cancelar"],"2026-09-19"],[1575100,"ATec7CAU","RM","REQUERIMIENTO","2026-09-19","2026-09-21",["cancelar"],"2026-09-21"],[1575183,"ATec6CAU","RM","REQUERIMIENTO","2026-09-20","2026-09-23",["cancelar"],"2026-09-21"],[1576010,"ATec7CAU","RM","REQUERIMIENTO","2026-09-22","2026-09-23",["cancelar"],"2026-09-22"],[1576094,"ATec3CAU","RM","REQUERIMIENTO","2026-09-22","2026-10-15",["cancelar"],"2026-10-06"],[1576720,"ATec5CAU","RM","REQUERIMIENTO","2026-09-22","2026-09-25",["cancelar"],"2026-09-25"],[1576721,"ATec2CAU","RM","REQUERIMIENTO","2026-09-22","2026-10-06",["molesta"],"2026-09-23"],[1578160,"ATec5CAU","RM","REQUERIMIENTO","2026-09-24","2026-10-02",["cancelar"],"2026-10-01"],[1578334,"ATec4CAU","RM","REQUERIMIENTO","2026-09-25","2026-09-29",["cancelar"],"2026-09-29"],[1578360,"ATec4CAU","RM","REQUERIMIENTO","2026-09-25","2026-09-30",["cancelar"],"2026-09-30"],[1578610,"ATec1CAU","RM","REQUERIMIENTO","2026-09-25","2026-09-30",["cancelar"],"2026-09-30"],[1579764,"ATec2CAU","LCA","SEGUIMIENTO","2026-09-29","2026-10-06",["molesta"],"2026-09-29"],[1581334,"ATecINTCAU","RM","PEDIDO","2026-10-01","2026-10-20",["molesta"],"2026-10-01"],[1581699,"ATec7CAU","RM","REQUERIMIENTO","2026-10-02","2026-10-05",["cancelar"],"2026-10-05"],[1581709,"ATecSBCAU","RM","REQUERIMIENTO","2026-10-02","2026-10-19",["cancelar"],"2026-10-06"],[1583157,"ATecENC1CAU","RM","REQUERIMIENTO","2026-10-06","2026-10-07",["molesta"],"2026-10-06"],[1583830,"ATec6CAU","RM","REQUERIMIENTO","2026-10-07","2026-10-07",["molesta"],"2026-10-07"],[1584028,"ATec10CAU","RM","REQUERIMIENTO","2026-10-07","2026-10-14",["cancelar"],"2026-10-09"],[1585864,"ATec7CAU","RM","REQUERIMIENTO","2026-10-12","2026-10-13",["cancelar"],"2026-10-13"],[1586868,"ATec1CAU","RM","REQUERIMIENTO","2026-10-13","2026-10-13",["molesta"],"2026-10-13"],[1588415,"ATecSBCAU","RM","REQUERIMIENTO","2026-10-16","2026-10-19",["cancelar"],"2026-10-19"]]; // [caso, zona, asesor, estado, creado, ultimaGestion, [palabras], ultimaMencion]
+const WORDS=["molesta","cancelar","harta","sedeco"],ESTADOS=["REQUERIMIENTO","SEGUIMIENTO","PEDIDO"];
+const $=id=>document.getElementById(id);
+const fmt=f=>f?f.split("-").reverse().join("/"):"—";
+const age=f=>Math.round((SNAP-new Date(f+"T00:00:00"))/864e5);
+const cls=d=>d>=100?"d-r":d>=30?"d-a":"";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uniq=i=>[...new Set(D.map(r=>r[i]))].sort();
+const st={a:"",t:"",q:"",o:"ant",w:new Set(),e:new Set()};
+if((SNAP-new Date(CORTE+"T00:00:00"))/864e5>2){const w=$("warn");w.hidden=false;w.textContent="Los comentarios que lee este tablero llegan hasta el "+fmt(CORTE)+". Lo escrito después no se ve, y puede faltar algún caso que ya mencionó una de las palabras.";}
+function opts(el,all,list){el.innerHTML='<option value="">'+all+'</option>'+list.map(x=>'<option>'+esc(x)+'</option>').join("")}
+opts($("fa"),"Todos los asesores",uniq(2));opts($("ft"),"Todas las zonas",uniq(1));
+function chips(el,items,set,label){el.innerHTML=items.map(x=>'<button type="button" class="chip" aria-pressed="false" data-v="'+x+'">'+label(x)+'</button>').join("");
+  el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const v=b.dataset.v;set.has(v)?set.delete(v):set.add(v);b.setAttribute("aria-pressed",set.has(v));render()}}
+chips($("cw"),WORDS,st.w,w=>w+" ("+D.filter(r=>r[6].includes(w)).length+")");
+chips($("ce"),ESTADOS,st.e,e=>e[0]+e.slice(1).toLowerCase()+" ("+D.filter(r=>r[3]===e).length+")");
+$("fa").onchange=e=>{st.a=e.target.value;render()};$("ft").onchange=e=>{st.t=e.target.value;render()};
+$("fo").onchange=e=>{st.o=e.target.value;render()};$("fq").oninput=e=>{st.q=e.target.value.trim();render()};
+const cmp={ant:(x,y)=>x[4].localeCompare(y[4])||x[0]-y[0],men:(x,y)=>y[7].localeCompare(x[7])||x[0]-y[0],ges:(x,y)=>(x[5]||"").localeCompare(y[5]||"")||x[0]-y[0]};
+function render(){
+  const L=D.filter(r=>(!st.a||r[2]===st.a)&&(!st.t||r[1]===st.t)&&(!st.q||String(r[0]).includes(st.q))&&(!st.w.size||r[6].some(w=>st.w.has(w)))&&(!st.e.size||st.e.has(r[3]))).sort(cmp[st.o]);
+  const by={};L.forEach(r=>by[r[2]]=(by[r[2]]||0)+1);const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];
+  const old=L.length?L.reduce((m,r)=>r[4]<m[4]?r:m):null;
+  $("k").innerHTML='<div class="k"><b>'+L.length+'</b><span>casos urgentes</span></div>'
+   +'<div class="k"><b>'+(UNIV?(100*L.length/UNIV).toFixed(1).replace(".",","):"0")+' %</b><span>de '+UNIV.toLocaleString("es")+' casos abiertos en el período</span></div>'
+   +'<div class="k"><b class="d-r">'+(old?age(old[4])+" d":"—")+'</b><span>el más antiguo'+(old?" (#"+old[0]+")":"")+'</span></div>'
+   +'<div class="k"><b>'+(top?esc(top[0]):"—")+'</b><span>asesor con más casos'+(top?" ("+top[1]+")":"")+'</span></div>';
+  $("tb").innerHTML=L.length?L.map(r=>'<tr><td>#'+r[0]+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td><td><span class="tag">'+r[3]+'</span></td><td>'+fmt(r[4])+'</td><td class="n '+cls(age(r[4]))+'">'+age(r[4])+' d</td><td>'+fmt(r[5])+'</td><td>'+r[6].map(w=>'<span class="w w-'+w+'">'+w+'</span>').join("")+'</td><td>'+fmt(r[7])+'</td></tr>').join(""):'<tr><td colspan="9" class="empty">Ningún caso con estos filtros.</td></tr>';
+}
+render();
+</script>
+</body></html>
