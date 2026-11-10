@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suspensiones vencidas · RIC</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#16243a;--mut:#6b7a90;--line:#e3e8f0;--navy:#1f3864;--red:#e8433a;--amb:#f5a623;--gry:#7a92aa}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1624;--card:#17223a;--ink:#e8edf5;--mut:#9aa8bd;--line:#26344f;--navy:#8fb0ee}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0;color:var(--navy)}.sub{color:var(--mut);font-size:12px;margin:2px 0 14px}
+a{color:var(--navy)}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:220px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.k b{display:block;font-size:22px}.k span{color:var(--mut);font-size:12px}
+.as{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.ah{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;background:rgba(31,56,100,.06)}
+.ah strong{color:var(--navy)}.ah small{color:var(--mut)}
+table{width:100%;border-collapse:collapse}th,td{padding:7px 12px;text-align:left;border-top:1px solid var(--line);font-size:13px}
+th{color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.d-r{color:var(--red);font-weight:700}.d-a{color:var(--amb);font-weight:600}.d-g{color:var(--gry)}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;background:var(--line)}
+.tag.sc{background:#f8cbad;color:#7a2a10}.tag.sm{background:#ffe699;color:#6b4c00}
+.scroll{overflow-x:auto}.note{color:var(--mut);font-size:12px;margin-top:14px}
+</style></head><body><div class="wrap">
+<h1>Suspensiones vencidas</h1>
+<div class="sub">Casos RIC en Requerimiento, Pedido, Seguimiento o Pendiente con una suspensión de servicio cuya fecha de reactivación ya pasó · datos al 2026-11-10 · <a href="casos-antiguos-ric.html">Ver casos más antiguos por asesor</a></div>
+<div class="bar"><label for="f"><b>Asignado</b></label><select id="f"></select><label for="o"><b>Ordenar por</b></label><select id="o"><option value="atr">Más días de atraso (mayor a menor)</option><option value="ges">Más días sin gestión (mayor a menor)</option><option value="cre">Más antiguos (fecha de creación)</option></select></div>
+<div class="kpis" id="k"></div><div id="out"></div>
+<div class="note">La fecha de reactivación se deduce de los comentarios del caso ("por N meses", "facturar a partir de…", "hasta…"); es una estimación y debe confirmarse en Oppen. "A pedido del cliente" = pausa solicitada por el cliente; "Por morosidad" = suspensión preventiva con el abono suspendido por un plazo.</div>
+<script>
+const SNAP=new Date("2026-11-10T00:00:00");
+const D=[[1542854,"SAB","REQUERIMIENTO","BaDefServCVig","2026-07-23",64,"M","2026-10-23"],[1545145,"XB","PENDIENTE","BaDefServCVig","2026-07-28",1,"M","2026-10-28"],[1525534,"XB","PENDIENTE","BaDefServCVn","2026-06-18",13,"M","2026-10-18"],[1529351,"SAB","PENDIENTE","BaDefServCVig","2026-06-26",48,"M","2026-10-26"],[1530556,"XB","REQUERIMIENTO","BaDefServCVig","2026-06-29",99,"M","2026-10-29"],[1530706,"XB","REQUERIMIENTO","BaDefServCVn","2026-06-30",99,"M","2026-10-30"],[1530711,"NG","SEGUIMIENTO","BaDefServCVn","2026-06-30",36,"M","2026-10-30"],[1511195,"MAYALA","REQUERIMIENTO","BaDefServCVig","2026-05-21",29,"M","2026-09-21"],[1511895,"NAR","PENDIENTE","BaDefServCVn","2026-05-22",96,"M","2026-09-22"],[1527594,"XB","PEDIDO","BaDefServCVn","2026-06-23",40,"M","2026-10-23"],[1496344,"MAYALA","REQUERIMIENTO","BaDefServCVn","2026-04-20",29,"M","2026-08-20"],[1512356,"NG","SEGUIMIENTO","BaDefServCVig","2026-05-23",47,"M","2026-09-23"],[1527358,"DUN","PENDIENTE","BaDefServCVn","2026-06-23",76,"M","2026-10-23"],[1540815,"NAR","PEDIDO","BaDefServCVig","2026-07-20",38,"M","2026-10-20"],[1540901,"DUN","PENDIENTE","BaDefServCVig","2026-07-20",4,"M","2026-10-20"],[1514575,"DUN","PEDIDO","BaDefServCVn","2026-05-27",76,"M","2026-09-27"],[1523730,"DUN","PENDIENTE","BaDefServCVn","2026-06-15",9,"M","2026-10-15"],[1525660,"DUN","PEDIDO","BaDefServCVn","2026-06-18",75,"M","2026-10-18"],[1490338,"XB","SEGUIMIENTO","SuTmpSvRIC","2026-04-08",18,"C","2026-08-01"],[1512027,"XB","SEGUIMIENTO","SuTmpComRIC","2026-05-22",139,"C","2026-09-01"],[1514547,"NAR","SEGUIMIENTO","SuTmpComRIC","2026-05-27",83,"C","2026-08-31"],[1517054,"LMV","SEGUIMIENTO","SuTmpSvRIC","2026-06-01",56,"C","2026-10-09"],[1517347,"LMV","SEGUIMIENTO","SuTmpSvRIC","2026-06-02",15,"C","2026-09-15"],[1517882,"XB","SEGUIMIENTO","SuTmpComRIC","2026-06-03",99,"C","2026-09-01"],[1517883,"XB","SEGUIMIENTO","SuTmpComRIC","2026-06-03",99,"C","2026-09-01"],[1521404,"XB","SEGUIMIENTO","SuTmpComRIC","2026-06-09",138,"C","2026-11-01"],[1530455,"SAB","PENDIENTE","SuTmpSvRIC","2026-06-29",126,"C","2026-10-03"],[1538687,"LMV","SEGUIMIENTO","SuTmpComRIC","2026-07-15",47,"C","2026-10-15"],[1490163,"XB","SEGUIMIENTO","SuTmpComRIC","2026-04-07",140,"C","2026-08-01"],[1507467,"XB","SEGUIMIENTO","SuTmpSvRIC","2026-05-12",139,"C","2026-09-01"],[1530271,"XB","SEGUIMIENTO","SuTmpSvRIC","2026-06-29",131,"C","2026-10-01"],[1459499,"NAR","PENDIENTE","BaDefServCVn","2026-01-31",120,"M","2026-10-30"],[1530450,"NAR","SEGUIMIENTO","BClDefRIC","2026-06-29",118,"C","2026-10-15"],[1545876,"LMV","PENDIENTE","TrEqClRIC","2026-07-29",75,"C","2026-10-26"],[1538680,"LMV","PENDIENTE","SuTmpSvRIC","2026-07-15",113,"C","2026-10-17"],[1504119,"XB","SEGUIMIENTO","BaDefComRIC","2026-05-06",29,"C","2026-09-01"],[1499779,"XB","PENDIENTE","ReaServRic","2026-04-27",75,"C","2026-09-01"],[1515314,"XB","PENDIENTE","ReaServRic","2026-05-28",99,"C","2026-11-01"],[1548432,"SAB","PENDIENTE","BaDefComRIC","2026-08-04",88,"C","2026-11-10"],[1515218,"XB","PENDIENTE","BaDefComRIC","2026-05-28",117,"C","2026-10-01"],[1531664,"DUN","PENDIENTE","InBajCom","2026-07-02",4,"C","2026-10-31"],[1462459,"XB","SEGUIMIENTO","SuTmpSvRIC","2026-02-05",75,"C","2026-10-01"],[1483867,"LMV","PENDIENTE","SuTmpSvRIC","2026-03-23",1,"C","2026-09-30"],[1402651,"DUN","PENDIENTE","SuTmpSvRIC","2025-09-26",6,"C","2026-09-20"],[1521403,"NG","SEGUIMIENTO","InBajCom","2026-06-09",32,"C","2026-10-31"],[1574932,"NG","PENDIENTE","SuTmpSvRIC","2026-09-18",4,"C","2026-10-31"],[1521852,"NG","SEGUIMIENTO","BaDefServCVig","2026-06-10",12,"M","2026-10-29"]]; // [caso, asignado, estado, tema, creado, diasSinGestion, tipo C|M, reactivacionPrevista]
+const days=f=>Math.round((SNAP-new Date(f+"T00:00:00"))/864e5);
+const cls=d=>d>=100?"d-r":d>=30?"d-a":"d-g";
+const fmt=f=>f.split("-").reverse().join("/");
+const by={};D.forEach(r=>{(by[r[1]]=by[r[1]]||[]).push(r)});
+const cmp={atr:(x,y)=>days(y[7])-days(x[7])||x[0]-y[0],ges:(x,y)=>y[5]-x[5]||days(y[7])-days(x[7]),cre:(x,y)=>x[4].localeCompare(y[4])||x[0]-y[0]};
+const sel=document.getElementById("f"),ord=document.getElementById("o");
+sel.innerHTML='<option value="">Todos los asesores</option>'+Object.keys(by).sort().map(n=>`<option>${n}</option>`).join("");
+function render(){
+  const m=ord.value,v=sel.value;
+  Object.values(by).forEach(a=>a.sort(cmp[m]));
+  const names=Object.keys(by).sort((a,b)=>cmp[m](by[a][0],by[b][0]));
+  const list=v?[v]:names;const all=list.flatMap(n=>by[n]);
+  if(!all.length){document.getElementById("out").innerHTML="";return}
+  const mx=all.reduce((a,r)=>days(r[7])>days(a[7])?r:a,all[0]);
+  document.getElementById("k").innerHTML=
+    `<div class="k"><b>${all.length}</b><span>suspensiones vencidas</span></div>`+
+    `<div class="k"><b class="d-r">${all.filter(r=>r[6]==="C").length}</b><span>a pedido del cliente</span></div>`+
+    `<div class="k"><b class="d-a">${all.filter(r=>r[6]==="M").length}</b><span>por morosidad</span></div>`+
+    `<div class="k"><b class="d-r">${days(mx[7])} d</b><span>mayor atraso (#${mx[0]})</span></div>`;
+  document.getElementById("out").innerHTML=list.map(n=>{const a=by[n];
+    return `<div class="as"><div class="ah"><strong>${n}</strong><small>${a.length} caso${a.length>1?"s":""} · mayor atraso: ${Math.max(...a.map(r=>days(r[7])))} d</small></div><div class="scroll"><table><thead><tr><th>Caso</th><th>Tipo</th><th>Tema</th><th>Estado</th><th>Creado</th><th>Reactivación prevista</th><th class="n">Atraso (d)</th><th class="n">Sin gestión (d)</th></tr></thead><tbody>`+
+    a.map(r=>`<tr><td>#${r[0]}</td><td><span class="tag ${r[6]==="C"?"sc":"sm"}">${r[6]==="C"?"A pedido del cliente":"Por morosidad"}</span></td><td>${r[3]}</td><td><span class="tag">${r[2]}</span></td><td>${fmt(r[4])}</td><td>${fmt(r[7])}</td><td class="n ${cls(days(r[7]))}">${days(r[7])}</td><td class="n ${cls(r[5])}">${r[5]}</td></tr>`).join("")+`</tbody></table></div></div>`}).join("");
+}
+sel.onchange=render;ord.onchange=render;render();
+</script></div></body></html>
