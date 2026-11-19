@@ -19,14 +19,15 @@ select:focus-visible{outline:2px solid var(--navy);outline-offset:1px}
 .kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;color:var(--navy);line-height:1.15}
 .kpi span{font-size:11.5px;color:var(--muted)}
 .tw{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:860px;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+@media (max-width:1100px){td{padding:5px 2px;font-size:12px}td .c{font-size:9.5px}th{font-size:10.5px;padding:8px 2px}td.r{font-size:11px;padding-left:4px}td.m{padding-left:6px}}
 th{background:var(--head);font-size:11.5px;color:var(--navy);font-weight:700;padding:10px 4px;line-height:1.25;text-align:center;border-bottom:1px solid var(--line)}
 th small{display:block;font-weight:500;color:var(--muted);font-size:10.5px}
 td{padding:6px 4px;text-align:center;font-size:13.5px;vertical-align:middle}
 tr.a td{border-top:1px solid var(--line)}
 tr.g td{background-color:var(--zebra)}
-td.m{font-weight:700;text-align:left;padding-left:14px;white-space:nowrap}
-td.m em{font-style:normal;font-size:10.5px;font-weight:600;color:var(--ope);border:1px solid var(--ope);border-radius:10px;padding:1px 6px;margin-left:6px}
+td.m{font-weight:700;text-align:left;padding-left:10px;white-space:nowrap}
+td.m em{display:block;width:max-content;font-style:normal;font-size:10px;font-weight:600;color:var(--ope);border:1px solid var(--ope);border-radius:10px;padding:0 6px;margin-top:3px}
 td.n{color:var(--fg);font-weight:600}
 td.r{text-align:left;font-weight:700;font-size:12.5px;white-space:nowrap;padding-left:8px}
 td.r.com{color:var(--com)}td.r.cer{color:var(--cer)}td.r.ope{color:var(--ope)}
@@ -112,7 +113,7 @@ function render(){
     [(N-X).toLocaleString('es-PY'),'abiertos a hoy'],
     [fd(med([].concat.apply([],by).filter(r=>r[4]>=0).map(r=>r[4])))+' d','mediana hasta el 1er comentario']
   ].map(k=>'<div class="kpi"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>').join('');
-  let h='<thead><tr><th style="text-align:left;padding-left:14px">Mes de creación</th><th>Total<small>casos</small></th><th></th>'+M.map(k=>'<th>M'+k+'</th>').join('')+'<th class="sep">Total gestión</th><th>Total S/gestión</th><th>Total finalizados</th><th>Abiertos</th><th>Mediana<small>días 1er comentario</small></th></tr></thead><tbody>';
+  let h='<thead><tr><th style="text-align:left;padding-left:10px">Mes</th><th>Total<small>casos</small></th><th></th>'+M.map(k=>'<th>M'+k+'</th>').join('')+'<th class="sep">Total gestión</th><th>Total S/gestión</th><th>Total finalizados</th><th>Abiertos</th><th>Mediana<small>días 1er comentario</small></th></tr></thead><tbody>';
   let g=0;
   D.meses.forEach((m,i)=>{
     const L=by[i];if(!L.length)return;g++;
